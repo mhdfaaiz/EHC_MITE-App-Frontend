@@ -92,6 +92,12 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+                release {
+        storeFile file('my-release-key.jks') // Update with the correct path
+        storePassword 'soniciot'
+        keyAlias 'my-key-alias'
+        keyPassword 'soniciot'
+    }
     }
     buildTypes {
         debug {
@@ -104,6 +110,8 @@ android {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
+        
+
     }
 }
 

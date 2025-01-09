@@ -4,11 +4,13 @@ export default function App({ navigation }) {
     return (
         <View style={styles.container}>
             {/* Logo Section */}
-            <Image style={styles.logo} source={require('../assets/logos.png')} />
+            <Image style={styles.logo} source={require('../assets/EHC.png')} />
+            <Image style={styles.logo1} source={require('../assets/etisalat.png')} />
+
 
             {/* Welcome Text */}
-            <Text style={styles.welcomeText}>Welcome to TRANSGAZ</Text>
-            <Text style={styles.subText}>Your gateway to excellence starts here</Text>
+            <Text style={styles.welcomeText}>Welcome to the ATE Monitor App</Text>
+            <Text style={styles.subText}>Powered by SONIC</Text>
 
             {/* Navigation Button for New Page */}
             <TouchableOpacity
@@ -24,13 +26,19 @@ export default function App({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f0f8ff',
+        backgroundColor: '#181818',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20,
     },
+    logo1: {
+        width: 200,
+        height: 80,
+        resizeMode: 'contain',
+        marginBottom: 20,
+    },
     logo: {
-        width: 300,
+        width: 350,
         height: 100,
         resizeMode: 'contain',
         marginBottom: 20,
@@ -49,7 +57,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     button: {
-        backgroundColor: '#161c55',
+        backgroundColor: '#3d3b3b',
         paddingVertical: 15,
         paddingHorizontal: 40,
         borderRadius: 25,

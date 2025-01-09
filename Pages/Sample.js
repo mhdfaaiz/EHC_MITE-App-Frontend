@@ -1,46 +1,96 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 
-const SerialNumberDisplay = ({ serialNumber }) => {
+export default function SerialNumberPage({ navigation }) {
+    const [selectedName, setSelectedName] = useState(null);
+    const [items, setItems] = useState([]);
+
+    useEffect(() => {
+        fetch('https://soniciot.com/api/Serial_List')
+            .then((response) => response.json())
+            .then((data) =>
+                setItems(data.map((item) => ({ label: item.name, value: item.serial_number })))
+            )
+            .catch((error) => console.error(error));
+    }, []);
+
+    const handleNextPage = () => {
+        if (!selectedName) {
+            alert('Please select the device');
+            return;
+        }
+        navigation.navigate('Main', { serialNumber: selectedName });
+    };
+
     return (
         <View style={styles.container}>
-            <View style={styles.displayWrapper}>
-                <Text style={styles.serialText}>1883c40496c6</Text>
-            </View>
+            <Text style={styles.title}>Select Your Device</Text>
+            <Text style={styles.subText}>Choose from the list below to proceed</Text>
+            <Dropdown
+                data={items}
+                labelField="label"
+                valueField="value"
+                placeholder="Select a field"
+                value={selectedName}
+                onChange={(item) => setSelectedName(item.value)}
+                style={styles.dropdown}
+                containerStyle={styles.dropdownContainer}
+                selectedTextStyle={styles.dropdownText}
+                flatListProps={{
+                    nestedScrollEnabled: true, // Allows the dropdown to function correctly.
+                }}
+            />
+            <TouchableOpacity style={styles.button} onPress={handleNextPage}>
+                <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
         </View>
     );
-};
-
-export default SerialNumberDisplay;
+}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#333', // Dark background for the panel
+        backgroundColor: '#181818',
+        padding: 20,
     },
-    displayWrapper: {
-        width: 200, // Adjust width as per your design
-        height: 50, // Adjust height for a small display
-        backgroundColor: '#000', // Display background color
-        borderRadius: 10, // Rounded corners
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2, // Border width for a metallic finish
-        borderColor: '#888', // Border color
-        shadowColor: '#000', // Shadow for depth
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.7,
-        shadowRadius: 10,
-        elevation: 5, // Elevation for Android
+    title: {
+        fontSize: 24,
+        color: '#fff',
+        marginBottom: 20,
     },
-    serialText: {
-        fontSize: 18, // Font size for the serial number
+    subText: {
+        fontSize: 16,
+        color: '#555',
+        marginBottom: 30,
+        textAlign: 'center',
+    },
+    dropdown: {
+        backgroundColor: '#292929',
+        borderRadius: 8,
+        borderColor: '#444',
+        paddingHorizontal: 12,
+        width: '80%',
+        marginBottom: 20,
+        height: 50
+    },
+    dropdownContainer: {
+        backgroundColor: '#292929',
+
+    },
+    dropdownText: {
+        color: '#fff',
+    },
+    button: {
+        backgroundColor: '#e3dfde',
+        paddingVertical: 12,
+        paddingHorizontal: 40,
+        borderRadius: 8,
+    },
+    buttonText: {
+        color: 'black',
         fontWeight: 'bold',
-        color: '#fff', // White text color
-        textShadowColor: '#16b800', // Green shadow for a glowing effect
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 10, // Create a glowing effect
     },
 });

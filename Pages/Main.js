@@ -18,7 +18,7 @@ const IndicatorApp = ({ route, navigation }) => {
     const iconNames = ['DI1', 'DI2', 'DI3', 'DI4']
     const flatListRef = useRef(null);
     const serialNumber = route.params?.serialNumber;
-    const [activeButton, setActiveButton] = useState(null)
+    const [activeButton, setActiveButton] = useState('live')
 
     const handlePressIn = (buttonName) => {
         setActiveButton(buttonName);
@@ -169,7 +169,6 @@ const IndicatorApp = ({ route, navigation }) => {
 
 
 
-    // Function to fetch logs from the backend
     const fetchLogs = async () => {
         try {
             const response = await fetch("https://soniciot.com/api/logs"); // Replace with your API URL
@@ -177,14 +176,25 @@ const IndicatorApp = ({ route, navigation }) => {
             if (!response.ok) {
                 throw new Error("Failed to fetch logs");
             }
+
             const data = await response.json(); // Parse JSON response
-            const filteredData = data.filter(log => log.device === serialNumber);
-            setLogData(filteredData); // Store the fetched logs
+
+            // Filter logs by the serial number
+            const filteredData = data.filter((log) => log.device === serialNumber);
+
+            // Add sequential ID numbers to the filtered logs
+            const numberedData = filteredData.map((log, index) => ({
+                ...log,
+                id: index + 1, // Add a new 'id' field starting from 1
+            }));
+
+            setLogData(numberedData); // Store the fetched logs with IDs
             setLoading(false);
         } catch (err) {
             setError(err.message);
         }
     };
+
 
     useEffect(() => {
         fetchLogs(); // Fetch logs when the component mounts
@@ -259,12 +269,12 @@ const IndicatorApp = ({ route, navigation }) => {
 
     const renderItem = ({ item }) => (
         <View style={styles.row}>
-            <Text style={[styles.cell, styles.col1]}>{item.id}</Text>
-            <Text style={[styles.cell, styles.col2]}>{new Date(item.registered_at).toLocaleString()}</Text>
-            <Text style={[styles.cell, styles.col3]}>{item.event}</Text>
-            <Text style={[styles.cell, styles.col4]}>{item.parameter}</Text>
-            <Text style={[styles.cell, styles.col5]}>{item.value}</Text>
-            <Text style={[styles.cell, styles.col6]}>{item.device}</Text>
+            <Text style={[styles.celll, styles.col1]}>{item.id}</Text>
+            <Text style={[styles.celll, styles.col2]}>{new Date(item.registered_at).toLocaleString()}</Text>
+            <Text style={[styles.celll, styles.col3]}>{item.event}</Text>
+            <Text style={[styles.celll, styles.col4]}>{item.parameter}</Text>
+            <Text style={[styles.celll, styles.col5]}>{item.value}</Text>
+            <Text style={[styles.celll, styles.col6]}>{item.device}</Text>
         </View>
     );
 
@@ -272,8 +282,8 @@ const IndicatorApp = ({ route, navigation }) => {
     if (loading) {
         return (
             <View style={styles.container}>
-                <ActivityIndicator size="large" color="#0000ff" />
-                <Text>Loading data...</Text>
+                <ActivityIndicator size="large" color="white" />
+                <Text style={styles.loadingtext}>Loading data...</Text>
             </View>
         );
     }
@@ -315,7 +325,6 @@ const IndicatorApp = ({ route, navigation }) => {
         <SafeAreaView style={styles.container}>
             <View style={styles.first}>
                 <Icon style={styles.settings} name="settings-outline" size={30} color="gray" onPress={handleNextPage} />
-                <Image style={styles.logo} source={require('../assets/logos.png')} />
             </View>
             <View style={styles.intro}>
                 <View style={styles.serialbox}>
@@ -323,28 +332,9 @@ const IndicatorApp = ({ route, navigation }) => {
                 </View>
 
                 <Text style={[styles.statusText, { color: connectionState.color }]}>
-                    {connectionState.color === '#16b800' ? 'Online' : 'Offline'}
+                    {connectionState.color === '#16b800' ? 'ONLINE' : 'OFFLINE'}
                 </Text>
-                <View style={styles.outerBezell}>
-                    {connectionState.color == '#16b800' && (
-                        <View
-                            style={[
-                                styles.glowEffect,
-                                { backgroundColor: '#16b800' }, // Green glow
-                            ]}
-                        />
-                    )}
-                    {connectionState.color != '#16b800' && (
-                        <View
-                            style={[
-                                styles.glowEffect,
-                                { backgroundColor: '#b10303' }, // Red glow
-                            ]}
-                        />
-                    )}
 
-                    <View style={[styles.connectionindicator, { backgroundColor: connectionState.color }]} />
-                </View>
             </View>
             <View style={styles.indicatorRow}>
                 {iconNames.map((name, index) => (
@@ -419,9 +409,9 @@ const IndicatorApp = ({ route, navigation }) => {
                 {currentView === 'live' && (
                     <>
                         <View style={styles.header}>
-                            <Text style={[styles.cell, styles.dateCell]}>Date / Time</Text>
-                            <Text style={[styles.cell, styles.dataCell]}>Input</Text>
-                            <Text style={[styles.cell, styles.statusCell]}>Status</Text>
+                            <Text style={[styles.heading, styles.dateHead]}>DATE / TIME</Text>
+                            <Text style={[styles.heading, styles.dataCell]}>INPUT</Text>
+                            <Text style={[styles.heading, styles.statusHead]}>STATUS</Text>
                         </View>
 
                         <FlatList
@@ -474,8 +464,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        backgroundColor: '#333',
+        backgroundColor: '#181818',
         padding: 20,
+    },
+    loadingtext: {
+        color: 'white'
     },
     errorText: {
         color: 'red',
@@ -488,11 +481,11 @@ const styles = StyleSheet.create({
     logo: {
         marginBottom: 20,
         marginLeft: 70,
-        width: 190,
-        height: 50,
+        width: 100,
+        height: 25,
     },
     settings: {
-        marginTop: 10
+        marginBottom: 20
     },
     intro: {
         flexDirection: 'row',
@@ -523,14 +516,11 @@ const styles = StyleSheet.create({
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 10, // Create a glowing effect
     },
-    connectionindicator: {
-        width: 30,  // Smaller size for the indicator itself
-        height: 30,
-        borderRadius: 15, // Half of width/height
-        shadowColor: '#fff', // Highlight effect
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.9,
-        shadowRadius: 10,
+    statusText: {
+        marginLeft: 70,
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginTop: 5
     },
     top: {
         flexDirection: 'row',
@@ -576,9 +566,9 @@ const styles = StyleSheet.create({
         right: 0
     },
     cleartext: {
-        backgroundColor: 'white',
-        width: 80,
-        height: 40,
+        backgroundColor: '#222',
+        width: 70,
+        height: 35,
         borderRadius: 5,
         paddingVertical: 10,
         paddingHorizontal: 15,
@@ -594,6 +584,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 4,
         elevation: 5,
+        fontWeight: 'bold',
+        color: 'white'
     },
     buttonText: {
         color: '#fff',
@@ -618,7 +610,7 @@ const styles = StyleSheet.create({
     label: {
         marginTop: 5,
         fontSize: 14,
-        color: '#000',
+        color: 'white',
         fontWeight: 'bold',
     },
     textInput: {
@@ -653,17 +645,18 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 4,
         elevation: 5,
+        fontWeight: 'bold'
     },
     box: {
         width: '100%',
         alignItems: 'center',
-        backgroundColor: '#161c55',
+        backgroundColor: '#353535',
         borderRadius: 10,
 
     },
     header: {
         flexDirection: 'row',
-        backgroundColor: '#f0f8ff',
+        backgroundColor: '#282828',
         paddingVertical: 10,
         borderRadius: 5,
         marginTop: 5,
@@ -671,7 +664,7 @@ const styles = StyleSheet.create({
     },
     tablebox: {
         width: '98%',
-        backgroundColor: '#f0f8ff',
+        backgroundColor: '#282828',
         borderRadius: 5,
         marginTop: 5,
         marginBottom: 5
@@ -687,10 +680,32 @@ const styles = StyleSheet.create({
         color: 'ffff'
 
     },
+    heading: {
+        textAlign: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'white',
+        marginLeft: 10
+    },
+    statusHead: {
+        flex: 2,
+    },
+    dateHead: {
+        flex: 5,
+        textAlign: 'left',
+        paddingHorizontal: 10,
+        color: 'white',
+    },
     cell: {
         textAlign: 'center',
         fontSize: 14,
-        color: 'black',
+        color: 'white',
+        marginRight: 10
+    },
+    celll: {
+        textAlign: 'center',
+        fontSize: 14,
+        color: 'white',
     },
     col1: {
         width: '10%'
@@ -714,23 +729,13 @@ const styles = StyleSheet.create({
         flex: 3,
         textAlign: 'left',
         paddingHorizontal: 10,
-        color: 'black',
+        color: 'white',
     },
     dataCell: {
         flex: 2,
     },
     statusCell: {
         flex: 1,
-    },
-    statusText: {
-        marginLeft: 90,
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginTop: 5
-    },
-    canvas: {
-        width: 300,
-        height: 300,
     },
     outerBezel: {
         width: 55,
@@ -778,31 +783,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         elevation: 3,
     },
-    outerBezell: {
-        width: 45,  // Outer bezel size
-        height: 45,
-        borderRadius: 22.5,  // Half of width/height for circular shape
-        borderWidth: 4, // Reduced border width to match new size
-        borderColor: '#999', // Metallic ring
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#444', // Bezel inner background
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 5 },
-        shadowOpacity: 0.5,
-        shadowRadius: 8,
-        elevation: 10,
-    },
-    glowEffect: {
-        position: 'absolute',
-        width: 55, // Slightly larger for the glow effect
-        height: 55,
-        borderRadius: 27.5, // Half of width/height
-        opacity: 0.7,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 1,
-        shadowRadius: 15,
-    },
+
 
 });
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Switch } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Switch, ScrollView } from 'react-native';
 
 export default function SettingsPage({ route, navigation }) {
     const { serialNumber, indicatorNames, reverseState, onUpdate } = route.params;
@@ -15,7 +15,6 @@ export default function SettingsPage({ route, navigation }) {
 
     const handleSubmit = async () => {
         try {
-            // Update Indicator Names
             const updateNamesPromises = indicatorname.map(({ id, name }) =>
                 fetch(`https://soniciot.com/api/indicators/${id}`, {
                     method: 'PUT',
@@ -24,9 +23,7 @@ export default function SettingsPage({ route, navigation }) {
                 })
             );
             await Promise.all(updateNamesPromises);
-            console.log('All indicator names updated successfully');
 
-            // Update Reverse State
             const reverseResponse = await fetch(
                 `https://soniciot.com/api/reverse-indicator/${serialNumber}`,
                 {
@@ -40,7 +37,6 @@ export default function SettingsPage({ route, navigation }) {
                 console.log('Reverse indicator updated successfully');
             }
 
-            // Notify Parent Page
             if (onUpdate) {
                 onUpdate({ updatedIndicatornames: indicatorname, updatedReversestate: isReversed });
             }
@@ -51,142 +47,170 @@ export default function SettingsPage({ route, navigation }) {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.pageTitle}>Settings</Text>
-            <View style={styles.content}>
-                <Text style={styles.sectionTitle}>Change Indicator Names:</Text>
-                <TouchableOpacity style={styles.editbutton} onPress={() => setIsEditing(!isEditing)}>
-                    <Text style={styles.buttonText}>{isEditing ? 'Save' : 'Edit Name'}</Text>
-                </TouchableOpacity>
-                <View style={styles.indicatornameRow}>
-                    {indicatorname.map(({ id, name }) => (
-                        <View key={id} style={styles.indicatorWrapper}>
-                            {isEditing ? (
-                                <>
-                                    <View style={styles.iconss} />
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.container}>
+                <Text style={styles.pageTitle}>Settings</Text>
+
+                <View style={styles.card}>
+                    {/* Section Title */}
+                    <Text style={styles.sectionTitle}>Change Indicator Names</Text>
+
+                    {/* Indicator Name List */}
+                    <View style={styles.indicatorList}>
+                        {indicatorname.map(({ id, name }) => (
+                            <View key={id} style={styles.indicatorWrapper}>
+                                {isEditing ? (
                                     <TextInput
                                         style={styles.textInput}
                                         value={name}
                                         onChangeText={(newName) => handleNameChange(id, newName)}
                                     />
-                                </>
-                            ) : (
-                                <>
-                                    <View style={styles.icons} />
-                                    <Text style={styles.label}>{name}</Text>
-                                </>
-                            )}
-                        </View>
-                    ))}
+                                ) : (
+                                    <Text style={styles.indicatorName}>{name}</Text>
+                                )}
+                            </View>
+                        ))}
+                    </View>
+
+                    {/* Edit/Save Button */}
+                    <View style={styles.buttonRow}>
+                        {!isEditing ? (
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => setIsEditing(true)}
+                            >
+                                <Text style={styles.buttonText}>Edit</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => setIsEditing(false)}
+                            >
+                                <Text style={styles.buttonText}>Save</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
-                <Text style={styles.sectionTitle}>Reverse Indicator:</Text>
-                <View style={styles.switchGroup}>
-                    <Switch value={isReversed} onValueChange={setIsReversed} />
-                    <Text>{isReversed ? 'Enabled' : 'Disabled'}</Text>
+
+                {/* Reverse Indicator Section */}
+                <View style={styles.card}>
+                    <Text style={styles.sectionTitle}>Reverse Indicator</Text>
+                    <View style={styles.switchRow}>
+                        <Switch value={isReversed} onValueChange={setIsReversed} />
+                        <Text style={styles.switchLabel}>{isReversed ? 'Enabled' : 'Disabled'}</Text>
+                    </View>
                 </View>
-                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+
+                {/* Submit Button */}
+                <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>Submit</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f0f8ff',
+        backgroundColor: '#121212', // Dark background
         alignItems: 'center',
         padding: 20,
     },
     pageTitle: {
-        fontSize: 24,
+        fontSize: 36,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#fff',
+        marginVertical: 20,
     },
-    content: {
-        flex: 1,
-        alignItems: 'center',
+    scrollContainer: {
+        flexGrow: 1, // Makes sure content can expand within ScrollView
+    },
+    card: {
         width: '100%',
-        marginTop: 50,
+        backgroundColor: '#1f1f1f', // Card background for sections
+        padding: 20,
+        borderRadius: 12,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.4,
+        shadowRadius: 10,
+        elevation: 5,
     },
     sectionTitle: {
         fontSize: 22,
-        marginVertical: 10,
-        width: '100%',
-        marginBottom: 30,
-        marginTop: 30,
+        color: '#fff',
+        marginBottom: 15,
+        fontWeight: '500',
     },
-    switchGroup: {
+    indicatorList: {
+        marginBottom: 20,
+    },
+    indicatorWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 10,
+        marginBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#444',
+        paddingBottom: 10,
     },
-    button: {
-        backgroundColor: '#161c55',
-        paddingVertical: 15,
+    indicatorName: {
+        fontSize: 18,
+        color: '#fff',
+        flex: 1,
+    },
+    textInput: {
+        width: '80%',
+        backgroundColor: '#333',
+        padding: 10,
+        color: '#fff',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#888',
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 10,
+    },
+    actionButton: {
+        backgroundColor: '#3d3b3b', // Blue color
+        paddingVertical: 12,
         paddingHorizontal: 40,
-        borderRadius: 25,
+        borderRadius: 30,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 5,
+        elevation: 5,
+        marginHorizontal: 10,
+    },
+    submitButton: {
+        backgroundColor: '#3d3b3b', // Vibrant Orange color for action
+        paddingVertical: 15,
+        paddingHorizontal: 50,
+        borderRadius: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        marginTop: 30,
         elevation: 5,
     },
     buttonText: {
         fontSize: 16,
-        fontWeight: 'bold',
         color: '#fff',
         textAlign: 'center',
     },
-    indicatornameRow: {
+    switchRow: {
         flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 20,
-        width: '77%',
     },
-    indicatorWrapper: {
-        alignItems: 'center',
-        marginHorizontal: 10,
-    },
-    label: {
-        marginTop: 5,
-        fontSize: 14,
-        color: 'red',
-        fontWeight: 'bold',
-    },
-    editbutton: {
-        backgroundColor: 'grey',
-        borderRadius: 10,
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5,
-        marginBottom: 30,
-    },
-    icons: {
-        width: 30,
-        height: 30,
-        borderRadius: 10,
-        backgroundColor: 'red',
-        marginLeft: 5,
-    },
-    iconss: {
-        width: 30,
-        height: 30,
-        borderRadius: 10,
-        backgroundColor: 'green',
-        marginLeft: 10,
-    },
-    textInput: {
-        color: 'green',
-        borderBottomWidth: 1,
-        borderBottomColor: 'green',
-        paddingBottom: 5
+    switchLabel: {
+        fontSize: 16,
+        color: '#bbb',
     },
 });
+
