@@ -182,8 +182,11 @@ const IndicatorApp = ({ route, navigation }) => {
             // Filter logs by the serial number
             const filteredData = data.filter((log) => log.device === serialNumber);
 
-            // Add sequential ID numbers to the filtered logs
-            const numberedData = filteredData.map((log, index) => ({
+            // Sort logs in ascending order of the date
+            const sortedData = filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Add sequential ID numbers to the sorted logs
+            const numberedData = sortedData.map((log, index) => ({
                 ...log,
                 id: index + 1, // Add a new 'id' field starting from 1
             }));
@@ -194,6 +197,7 @@ const IndicatorApp = ({ route, navigation }) => {
             setError(err.message);
         }
     };
+
 
 
     useEffect(() => {

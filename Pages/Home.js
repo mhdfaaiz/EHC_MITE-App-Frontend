@@ -4,12 +4,11 @@ export default function App({ navigation }) {
     return (
         <View style={styles.container}>
             {/* Logo Section */}
-            <Image style={styles.logo} source={require('../assets/EHC.png')} />
-            <Image style={styles.logo1} source={require('../assets/etisalat.png')} />
+            <Image style={styles.logo} source={require('../assets/logos.png')} />
 
 
             {/* Welcome Text */}
-            <Text style={styles.welcomeText}>Welcome to the ATE Monitor App</Text>
+            <Text style={styles.welcomeText}>Welcome to Gas Panel Monitor</Text>
             <Text style={styles.subText}>Powered by SONIC</Text>
 
             {/* Navigation Button for New Page */}
@@ -31,14 +30,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 20,
     },
-    logo1: {
-        width: 200,
-        height: 80,
-        resizeMode: 'contain',
-        marginBottom: 20,
-    },
     logo: {
-        width: 350,
+        width: 300,
         height: 100,
         resizeMode: 'contain',
         marginBottom: 20,
