@@ -16,7 +16,7 @@ export default function SettingsPage({ route, navigation }) {
     const handleSubmit = async () => {
         try {
             const updateNamesPromises = indicatorname.map(({ id, name }) =>
-                fetch(`https://soniciot.com/api/indicators/${id}`, {
+                fetch(`http://10.255.254.24:3000/api/indicators/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name }),
@@ -25,7 +25,7 @@ export default function SettingsPage({ route, navigation }) {
             await Promise.all(updateNamesPromises);
 
             const reverseResponse = await fetch(
-                `https://soniciot.com/api/reverse-indicator/${serialNumber}`,
+                `http://10.255.254.24:3000/api/reverse-indicator/${serialNumber}`,
                 {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },

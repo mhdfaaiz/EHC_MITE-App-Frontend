@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "223299360958",
+    "project_id": "gaspanelapp",
+    "storage_bucket": "gaspanelapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:223299360958:android:819c5dae54d6abcb2526ef",
+        "android_client_info": {
+          "package_name": "com.ehc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAskcgH2gWXEr017rcHtzHabmXTepqZ5DU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
