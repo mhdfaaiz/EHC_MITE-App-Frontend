@@ -21,7 +21,28 @@ export default function App() {
       }
     };
 
+    const getTokenAndSendToBackend = async () => {
+      try {
+        const token = await messaging().getToken();
+        console.log('🔑 FCM Token:', token);
+  
+        // Send the token to the backend
+        await fetch('http://10.255.254.24:3000/api/save-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token }),
+        });
+  
+      } catch (error) {
+        console.error('🔥 Error getting FCM token:', error);
+      }
+    };
+  
+
     requestUserPermission();
+    getTokenAndSendToBackend();
   }, []);
 
   useEffect(() => {
