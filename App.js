@@ -27,7 +27,7 @@ export default function App() {
         console.log('🔑 FCM Token:', token);
   
         // Send the token to the backend
-        await fetch('http://10.255.254.24:3000/api/save-token', {
+        await fetch('https://soniciot.com/api/save-token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

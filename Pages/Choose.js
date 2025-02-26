@@ -7,7 +7,7 @@ export default function SerialNumberPage({ navigation }) {
     const [items, setItems] = useState([]);
 
     useEffect(() => {
-        fetch('http://10.255.254.24:3000/api/Serial_List')
+        fetch('https://soniciot.com/api/Serial_List')
             .then((response) => response.json())
             .then((data) =>
                 setItems(data.map((item) => ({ label: item.name, value: item.serial_number })))
