@@ -332,7 +332,7 @@ const IndicatorApp = ({ route, navigation }) => {
             </View>
             <View style={styles.intro}>
                 <View style={styles.serialbox}>
-                    <Text style={styles.serialno}>{connectionState.serialNo || 'Serial not exist'}</Text>
+                    <Text style={styles.serialno}>{connectionState.serialNo || serialNumber}</Text>
                 </View>
 
                 <Text style={[styles.statusText, { color: connectionState.color }]}>
