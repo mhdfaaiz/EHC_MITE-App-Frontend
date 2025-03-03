@@ -9,9 +9,12 @@ export default function SerialNumberPage({ navigation }) {
     useEffect(() => {
         fetch('https://soniciot.com/api/Serial_List')
             .then((response) => response.json())
-            .then((data) =>
-                setItems(data.map((item) => ({ label: item.name, value: item.serial_number })))
-            )
+            .then((data) => {
+
+                const filteredData = data.filter((item) => item.category === 'adnoc');
+
+                setItems(filteredData.map((item) => ({ label: item.name, value: item.serial_number })))
+    })
             .catch((error) => console.error(error));
     }, []);
 
@@ -77,7 +80,7 @@ const styles = StyleSheet.create({
         height: 50
     },
     dropdownContainer: {
-        backgroundColor: '#292929',
+        backgroundColor: 'white',
 
     },
     dropdownText: {

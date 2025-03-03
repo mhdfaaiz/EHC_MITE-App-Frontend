@@ -4,7 +4,7 @@ export default function App({ navigation }) {
     return (
         <View style={styles.container}>
             {/* Logo Section */}
-            <Image style={styles.logo} source={require('../assets/logos.png')} />
+            <Image style={styles.logo} source={require('../assets/adnoc.png')} />
 
 
             {/* Welcome Text */}
@@ -25,14 +25,14 @@ export default function App({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#181818',
+        backgroundColor: 'white',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20,
     },
     logo: {
-        width: 300,
-        height: 100,
+        width: 350,
+        height: 150,
         resizeMode: 'contain',
         marginBottom: 20,
     },
