@@ -2,12 +2,13 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 const { io } = require("socket.io-client");
 import React, { useEffect, useState } from "react";
 import Graph from "../Components/Graph";
+import GasTank from "../Components/Gastank";
 
 export default function App({ navigation }) {
     const [voltageData, setVoltageData] = useState([0, 0, 0, 0, 0, 0]); // Default array
     const [volt, setVolt] = useState();
     useEffect(() => {
-        const socket = io("http://10.11.29.52:3000");
+        const socket = io("http://10.11.28.103:3000");
 
         socket.on("voltage", (data) => {
             data = JSON.parse(data);
@@ -22,9 +23,9 @@ export default function App({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.welcomeText}>Welcome to Gas Level</Text>
             <Text style={styles.subText}>Voltage: {voltageData[voltageData.length - 1]}</Text>
             <Graph style={styles.graph} dataPoints={voltageData} /> 
+            <GasTank voltage={volt} />
             <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Choose")}>
                 <Text style={styles.buttonText}>Go to Main Page</Text>
             </TouchableOpacity>

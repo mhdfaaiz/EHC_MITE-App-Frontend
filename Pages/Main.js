@@ -33,7 +33,7 @@ const IndicatorApp = ({ route, navigation }) => {
     };
     // Socket Initialization
     useEffect(() => {
-        const socket = io("http://10.11.27.144:3000");
+        const socket = io("http://10.11.31.140:3000");
 
         socket.on('connect', () => {
             console.log('WebSocket connected');
@@ -84,7 +84,7 @@ const IndicatorApp = ({ route, navigation }) => {
                     [data.data]: newColor,
                 }));
                 // Save the updated color to the backend
-                fetch('http://10.11.27.144:3000/api/indicatoricons/update', {
+                fetch('http://10.11.31.140:3000/api/indicatoricons/update', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -114,7 +114,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const initializeIndicators = async () => {
             try {
-                await fetch('http://10.11.27.144:3000/api/initialize', {
+                await fetch('http://10.11.31.140:3000/api/initialize', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const fetchIndicators = async () => {
             try {
-                const response = await fetch(`http://10.11.27.144:3000/api/indicators/${serialNumber}`);
+                const response = await fetch(`http://10.11.31.140:3000/api/indicators/${serialNumber}`);
                 const data = await response.json();
                 console.log(data)
                 setIndicatorname(data); // Set the fetched indicator names to state
@@ -153,7 +153,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const fetchIndicatorColors = async () => {
             try {
-                const response = await fetch(`http://10.11.27.144:3000/api/indicatoricons/${serialNumber}`);
+                const response = await fetch(`http://10.11.31.140:3000/api/indicatoricons/${serialNumber}`);
                 const data = await response.json();
 
                 // Map the colors from the response
@@ -177,7 +177,7 @@ const IndicatorApp = ({ route, navigation }) => {
 
     const fetchLogs = async () => {
         try {
-            const response = await fetch("http://10.11.27.144:3000/api/logs"); // Replace with your API URL
+            const response = await fetch("http://10.11.31.140:3000/api/logs"); // Replace with your API URL
 
             if (!response.ok) {
                 throw new Error("Failed to fetch logs");
@@ -222,7 +222,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://10.11.27.144:3000/api/mqtt-data');
+                const response = await fetch('http://10.11.31.140:3000/api/mqtt-data');
                 await response.json();
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -237,7 +237,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const fetchReverseIndicator = async () => {
             try {
-                const response = await fetch(`http://10.11.27.144:3000/api/reverse-indicator/${serialNumber}`);
+                const response = await fetch(`http://10.11.31.140:3000/api/reverse-indicator/${serialNumber}`);
                 const data = await response.json();
                 setIsReversed(data.isReversed);
             } catch (error) {
