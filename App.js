@@ -8,6 +8,8 @@ import Settings from './Pages/Settings';
 import Notification from './Components/Notification';
 import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
+import Gaslevel from './Pages/Gaslevel';
+import Graph from './Components/Graph';
 
 export default function App() {
   useEffect(() => {
@@ -72,6 +74,8 @@ export default function App() {
         <Stack.Screen name="Choose" component={Choose} />
         <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="Notification" component={Notification} />
+        <Stack.Screen name="Gaslevel" component={Gaslevel} />
+        <Stack.Screen name="Graph" component={Graph} />
       </Stack.Navigator>
     </NavigationContainer>
   );

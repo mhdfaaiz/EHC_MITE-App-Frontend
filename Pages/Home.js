@@ -14,7 +14,7 @@ export default function App({ navigation }) {
             {/* Navigation Button for New Page */}
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate('Choose')}
+                onPress={() => navigation.navigate('Gaslevel')}
             >
                 <Text style={styles.buttonText}>Go to Main Page</Text>
             </TouchableOpacity>
