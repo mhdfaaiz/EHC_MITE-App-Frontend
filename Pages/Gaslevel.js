@@ -23,9 +23,8 @@ export default function App({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.subText}>Voltage: {voltageData[voltageData.length - 1]}</Text>
             <Graph style={styles.graph} dataPoints={voltageData} /> 
-            <GasTank voltage={volt} />
+            <GasTank style={styles.GasTank} voltage={volt} />
         </View>
     );
 }
@@ -40,6 +39,9 @@ const styles = StyleSheet.create({
     graph: {
         flex: 1,
         justifyContent: 'top',
+    },
+    GasTank : {
+        borderCurve: 30
     },
     logo: {
         width: 350,
