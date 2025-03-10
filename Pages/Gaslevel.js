@@ -8,7 +8,7 @@ export default function App({ navigation }) {
     const [voltageData, setVoltageData] = useState([0, 0, 0, 0, 0, 0]); // Default array
     const [volt, setVolt] = useState();
     useEffect(() => {
-        const socket = io("http://10.11.28.103:3000");
+        const socket = io("https://soniciot.com");
 
         socket.on("voltage", (data) => {
             data = JSON.parse(data);
@@ -26,9 +26,6 @@ export default function App({ navigation }) {
             <Text style={styles.subText}>Voltage: {voltageData[voltageData.length - 1]}</Text>
             <Graph style={styles.graph} dataPoints={voltageData} /> 
             <GasTank voltage={volt} />
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Choose")}>
-                <Text style={styles.buttonText}>Go to Main Page</Text>
-            </TouchableOpacity>
         </View>
     );
 }

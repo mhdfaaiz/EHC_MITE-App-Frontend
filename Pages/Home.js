@@ -14,7 +14,7 @@ export default function App({ navigation }) {
             {/* Navigation Button for New Page */}
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate('Gaslevel')}
+                onPress={() => navigation.navigate('Choose')}
             >
                 <Text style={styles.buttonText}>Go to Main Page</Text>
             </TouchableOpacity>
@@ -25,7 +25,7 @@ export default function App({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#181818',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20,
@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
         height: 150,
         resizeMode: 'contain',
         marginBottom: 20,
+        borderCurve: 'circular'
     },
     welcomeText: {
         fontSize: 24,

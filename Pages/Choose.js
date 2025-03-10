@@ -7,7 +7,7 @@ export default function SerialNumberPage({ navigation }) {
     const [items, setItems] = useState([]);
 
     useEffect(() => {
-        fetch('http://10.11.27.144:3000/api/Serial_List')
+        fetch('https://soniciot.com/api/Serial_List')
             .then((response) => response.json())
             .then((data) => {
 
@@ -25,6 +25,12 @@ export default function SerialNumberPage({ navigation }) {
         }
         navigation.navigate('Main', { serialNumber: selectedName });
     };
+
+      // Tile data
+    const tiles = [
+        { title: 'Real-time table', onPress: () => navigation.navigate('Main') },
+        { title: 'Real-time graph', onPress: () => navigation.navigate('Gaslevel') },
+    ];
 
     return (
         <View style={styles.container}>
@@ -44,9 +50,18 @@ export default function SerialNumberPage({ navigation }) {
                     nestedScrollEnabled: true, // Allows the dropdown to function correctly.
                 }}
             />
-            <TouchableOpacity style={styles.button} onPress={handleNextPage}>
-                <Text style={styles.buttonText}>Submit</Text>
-            </TouchableOpacity>
+            {/* 2x2 Grid Tiles */}
+            <View style={styles.gridContainer}>
+                {tiles.map((tile, index) => (
+                <TouchableOpacity
+                    key={index}
+                    style={styles.tile}
+                    onPress={tile.onPress}
+                >
+                    <Text style={styles.tileText}>{tile.title}</Text>
+                </TouchableOpacity>
+                ))}
+            </View>
         </View>
     );
 }
@@ -76,7 +91,7 @@ const styles = StyleSheet.create({
         borderColor: '#444',
         paddingHorizontal: 12,
         width: '80%',
-        marginBottom: 20,
+        marginBottom: 100,
         height: 50
     },
     dropdownContainer: {
@@ -96,4 +111,30 @@ const styles = StyleSheet.create({
         color: 'black',
         fontWeight: 'bold',
     },
+    gridContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        width: '100%',
+      },
+      tile: {
+        width: '48%', // 2 tiles per row with a small gap
+        height: 200,
+        aspectRatio: 1, // Square tiles
+        backgroundColor: '#292929', // White background for tiles
+        borderRadius: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5, // Shadow for tiles
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        marginBottom: '4%', // Gap between tiles
+      },
+      tileText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#555', // Dark text color
+      },
 });
