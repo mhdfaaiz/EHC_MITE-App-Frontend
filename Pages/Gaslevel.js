@@ -7,6 +7,7 @@ import GasTank from "../Components/Gastank";
 export default function App({ navigation }) {
     const [voltageData, setVoltageData] = useState([0, 0, 0, 0, 0, 0]); // Default array
     const [volt, setVolt] = useState();
+
     useEffect(() => {
         const socket = io("https://soniciot.com");
 

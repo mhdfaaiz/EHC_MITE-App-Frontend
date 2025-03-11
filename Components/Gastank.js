@@ -2,36 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import Svg, { Circle, Path, G, Text as SvgText } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
-
+import Gaugemeter from './Gaugemeter';
 const { width } = Dimensions.get('window');
 
-const GasMonitor = ({ voltage = 0 }) => {
+const GasMonitor = ({ voltage }) => {
   // Handle NaN and invalid voltage values
   const parseVoltage = () => {
     const parsed = parseFloat(voltage);
-    return isNaN(parsed) ? 0 : Math.max(0, Math.min(parsed, 6)); // Assume 0-6V input range
+    return isNaN(parsed) ? 0 : Math.max(0, Math.min(parsed, 880)); // Assume 0-880V input range
   };
 
   const safeVoltage = parseVoltage();
-  const initialLevel = Math.min(Math.max((safeVoltage / 6) * 100, 0), 100);
+  const initialLevel = Math.min(Math.max(Math.round((safeVoltage / 880) * 100), 0), 100);
   const [displayLevel, setDisplayLevel] = useState(initialLevel);
   const heightAnim = useState(new Animated.Value(initialLevel))[0];
-  const needleAnim = useState(new Animated.Value(initialLevel))[0];
 
   useEffect(() => {
-    const newLevel = Math.min(Math.max((safeVoltage / 6) * 100, 0), 100);
+    const newLevel = Math.min(Math.max(Math.round((safeVoltage / 880) * 100), 0), 100);
     updateLevel(newLevel);
+    setDisplayLevel(newLevel)
   }, [safeVoltage]);
 
   const updateLevel = (newLevel) => {
     Animated.parallel([
       Animated.timing(heightAnim, {
-        toValue: newLevel,
-        duration: 1500,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: false,
-      }),
-      Animated.timing(needleAnim, {
         toValue: newLevel,
         duration: 1500,
         easing: Easing.out(Easing.ease),
@@ -45,59 +39,39 @@ const GasMonitor = ({ voltage = 0 }) => {
     outputRange: [0, 280],
   });
 
-  const needleRotation = needleAnim.interpolate({
-    inputRange: [0, 100],
-    outputRange: ['-120deg', '120deg'],
-  });
-
-  const renderTicks = () => {
-    const ticks = [];
-    for (let i = -120; i <= 120; i += 30) {
-      ticks.push(
-        <G key={i} rotation={i} origin="110, 110">
-          <Path
-            d="M110 30 V45"
-            stroke="#fff"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </G>
-      );
-    }
-    return ticks;
-  };
 
   return (
     <View style={styles.container}>
+      <View style={styles.row} >
       {/* Tank Section */}
-      <View style={styles.tankWrapper}>
-        <LinearGradient
-          colors={['#2a2a2a', '#1a1a1a']}
-          style={styles.tankOuter}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}>
-          <Animated.View style={[styles.liquid, { height: liquidHeight }]}>
-            <LinearGradient
-              colors={['#00f2fe', '#0056ff']}
-              style={StyleSheet.absoluteFill}
-              start={{ x: 0.5, y: 0 }}
-              end={{ x: 0.5, y: 1 }}
-            />
-            <View style={styles.liquidHighlight} />
-          </Animated.View>
-          <View style={styles.tankOverlay} />
-        </LinearGradient>
-        <View style={styles.tankStand} />
-      </View>
+        <View style={styles.tankWrapper}>
+          <LinearGradient
+            colors={['#2a2a2a', '#1a1a1a']}
+            style={styles.tankOuter}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}>
+            <Animated.View style={[styles.liquid, { height: liquidHeight }]}>
+              <LinearGradient
+                colors={['#00f2fe', '#0056ff']}
+                style={StyleSheet.absoluteFill}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+              />
+              <View style={styles.liquidHighlight} />
+            </Animated.View>
+            <View style={styles.tankOverlay} />
+          </LinearGradient>
+          <View style={styles.tankStand} />
+        </View>
+        <Gaugemeter needleLength={80}/>
+      </View >
 
       {/* Digital Display */}
       <View style={styles.displayContainer}>
         <LinearGradient
           colors={['#1a1a1a', '#000']}
           style={styles.displayInner}>
-          <Text style={styles.displayText}>
-            {Math.round(displayLevel)}%
-          </Text>
+          <Text style={styles.displayText}>{Math.round(displayLevel)}%</Text>
           <Text style={styles.displayLabel}>GAS LEVEL</Text>
         </LinearGradient>
       </View>
@@ -111,7 +85,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a0a0a',
     alignItems: 'center',
     paddingTop: 40,
-    width : 400
+    width: 400,
+  },
+  row : {
+    flexDirection : 'row'
   },
   tankWrapper: {
     alignItems: 'center',
@@ -122,12 +99,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   tankOuter: {
-    width: 120,
+    width: 150,
     height: 280,
     borderRadius: 30,
     overflow: 'hidden',
     borderWidth: 4,
     borderColor: '#333',
+    marginLeft : 20
   },
   liquid: {
     position: 'absolute',
@@ -161,6 +139,7 @@ const styles = StyleSheet.create({
     marginTop: -10,
     borderWidth: 2,
     borderColor: '#222',
+    marginLeft : 20
   },
   displayContainer: {
     backgroundColor: '#000',
@@ -189,32 +168,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 5,
     letterSpacing: 1.5,
-  },
-  meterContainer: {
-    position: 'relative',
-    marginTop: 20,
-  },
-  needle: {
-    position: 'absolute',
-    width: 3,
-    height: 90,
-    backgroundColor: '#ff4444',
-    left: 108,
-    top: 25,
-    transformOrigin: 'bottom center',
-    shadowColor: '#ff0000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 3,
-    borderRadius: 2,
-  },
-  centerCap: {
-    position: 'absolute',
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    top: 98,
-    left: 98,
   },
 });
 

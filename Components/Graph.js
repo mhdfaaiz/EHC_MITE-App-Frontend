@@ -3,7 +3,7 @@ import { View, Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 
 export default function Graph({ dataPoints = [0, 0, 0, 0, 0, 0] }) {
-    const labels = ["1", "2", "3", "4", "5", "6"]; // Represents last 6 readings
+    const labels = ["3.56", "2.67", "3.67", "2.98", "0.8", "6"]; // Represents last 6 readings
 
     return (
         <View>
@@ -13,7 +13,7 @@ export default function Graph({ dataPoints = [0, 0, 0, 0, 0, 0] }) {
                     datasets: [{ data: dataPoints }],
                 }}
                 width={Dimensions.get("window").width - 40}
-                height={220}
+                height={240}
                 yAxisSuffix="V" // Voltage unit
                 chartConfig={{
                     backgroundGradientFrom: "#000",
@@ -25,7 +25,7 @@ export default function Graph({ dataPoints = [0, 0, 0, 0, 0, 0] }) {
                     propsForDots: { r: "6", strokeWidth: "2", stroke: "#ffa726" },
                 }}
                 bezier
-                style={{ marginVertical: 8, borderRadius: 16 }}
+                style={{ marginVertical: 8, borderRadius: 16 ,}}
             />
         </View>
     );
