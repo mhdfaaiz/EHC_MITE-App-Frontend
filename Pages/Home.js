@@ -4,8 +4,13 @@ export default function App({ navigation }) {
     return (
         <View style={styles.container}>
             {/* Logo Section */}
-            <Image style={styles.logo} source={require('../assets/adnoc.png')} />
-
+            <View style={[styles.logoContainer, styles.elevation]}>
+                <Image 
+                    style={styles.logo} 
+                    source={require('../assets/adnoc.png')} 
+                    resizeMode="contain"
+                /> 
+            </View>
 
             {/* Welcome Text */}
             <Text style={styles.welcomeText}>Welcome to Gas Panel Monitor</Text>
@@ -30,6 +35,22 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 20,
     },
+    logoContainer: {
+        width : 200 ,
+        alignItems: 'center',
+        backgroundColor: 'white',
+        borderRadius: 5,
+        padding: 15,
+        marginBottom: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 15,
+      },
+      elevation: {
+        elevation: 20,
+        shadowColor: '#000',
+      },
     logo: {
         width: 350,
         height: 150,

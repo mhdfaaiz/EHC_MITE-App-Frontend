@@ -64,7 +64,7 @@ const GasMonitor = ({ voltage }) => {
           </LinearGradient>
           <View style={styles.tankStand} />
         </View>
-        <Gaugemeter/>
+        <Gaugemeter percentage={initialLevel}/>
       </View >
 
       {/* Digital Display */}

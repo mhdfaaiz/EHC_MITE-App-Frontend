@@ -1,20 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 
-export default function Graph({ dataPoints = [0, 0, 0, 0, 0, 0] }) {
-    const labels = ["3.56", "2.67", "3.67", "2.98", "0.8", "6"]; // Represents last 6 readings
+export default function Graph({ dataPoints = [] }) {
+    const [labels, setLabels] = useState([]);
+
+    useEffect(() => {
+        // Generate time labels for the last 6 readings
+        const getTimeLabels = () => {
+            const now = new Date();
+            return Array.from({ length: 6 }, (_, i) => {
+                const time = new Date(now.getTime() - (5 - i) * 60000); // 1-minute interval
+                return `${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`;
+            });
+        };
+
+        setLabels(getTimeLabels());
+    }, [dataPoints]); // Update labels when data changes
 
     return (
         <View>
             <LineChart
                 data={{
                     labels: labels,
-                    datasets: [{ data: dataPoints }],
+                    datasets: [{ data: dataPoints.length ? dataPoints : Array(6).fill(0) }],
                 }}
                 width={Dimensions.get("window").width - 40}
                 height={240}
-                yAxisSuffix="V" // Voltage unit
+                yAxisSuffix="V"
                 chartConfig={{
                     backgroundGradientFrom: "#000",
                     backgroundGradientTo: "#333",
@@ -25,7 +38,7 @@ export default function Graph({ dataPoints = [0, 0, 0, 0, 0, 0] }) {
                     propsForDots: { r: "6", strokeWidth: "2", stroke: "#ffa726" },
                 }}
                 bezier
-                style={{ marginVertical: 8, borderRadius: 16 ,}}
+                style={{ marginVertical: 8, borderRadius: 16 }}
             />
         </View>
     );

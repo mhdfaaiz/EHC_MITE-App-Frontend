@@ -1,14 +1,14 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Animated, Text, StyleSheet } from 'react-native';
-import Svg, { Circle, Path, Line, G, Defs, LinearGradient, Stop, RadialGradient } from 'react-native-svg';
+import React, { useEffect, useRef } from "react";
+import { View, Animated, StyleSheet } from "react-native";
+import Svg, { Circle, Path, Line, Defs, LinearGradient, Stop } from "react-native-svg";
 
-const AnimatedG = Animated.createAnimatedComponent(G);
-
-const ProfessionalGauge = ({ percentage = 50}) => {
+const ProfessionalGauge = ({ percentage = 0 }) => {
   const size = 200;
   const strokeWidth = 25;
   const center = size / 2;
   const radius = center - strokeWidth;
+
+  // Animated Value for Smooth Needle Movement
   const rotation = useRef(new Animated.Value(percentage)).current;
 
   useEffect(() => {
@@ -17,13 +17,15 @@ const ProfessionalGauge = ({ percentage = 50}) => {
       duration: 1500,
       useNativeDriver: true,
     }).start();
-  }, [percentage, rotation]);
+  }, [percentage]);
 
+  // Interpolating Rotation for the Needle
   const needleRotation = rotation.interpolate({
     inputRange: [0, 100],
-    outputRange: ['-135deg', '135deg'],
+    outputRange: ["-135deg", "135deg"], // Define rotation range
   });
 
+  // Arc Path Function
   const createArc = (startAngle, endAngle) => {
     const startRad = (startAngle * Math.PI) / 180;
     const endRad = (endAngle * Math.PI) / 180;
@@ -43,44 +45,20 @@ const ProfessionalGauge = ({ percentage = 50}) => {
             <Stop offset="0.5" stopColor="#FFEB3B" stopOpacity="1" />
             <Stop offset="1" stopColor="#F44336" stopOpacity="1" />
           </LinearGradient>
-          
-          <RadialGradient id="glassEffect" cx="50%" cy="50%" r="50%">
-            <Stop offset="0%" stopColor="#fff" stopOpacity="0.15" />
-            <Stop offset="100%" stopColor="#fff" stopOpacity="0" />
-          </RadialGradient>
         </Defs>
 
         {/* Base Circle */}
-        <Circle
-          cx={center}
-          cy={center}
-          r={radius}
-          fill="#1a1a1a"
-          stroke="#333"
-          strokeWidth={2}
-        />
+        <Circle cx={center} cy={center} r={radius} fill="#1a1a1a" stroke="#333" strokeWidth={2} />
 
         {/* Progress Track */}
-        <Path
-          d={createArc(-200, 20)}
-          stroke="#333"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          fill="none"
-        />
+        <Path d={createArc(-220, 40)} stroke="#333" strokeWidth={strokeWidth} strokeLinecap="round" fill="none" />
 
         {/* Progress Fill */}
-        <Path
-          d={createArc(-200, -110 + (2.7 * percentage))}
-          stroke="url(#progressGrad)"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          fill="none"
-        />
+        
 
         {/* Graduations */}
-        {Array.from({ length: 81 }).map((_, index) => {
-          const angle = -100 + (index * 4.5);
+        {Array.from({ length: 61 }).map((_, index) => {
+          const angle = -225 + index * 4.5;
           return (
             <Line
               key={index}
@@ -94,60 +72,25 @@ const ProfessionalGauge = ({ percentage = 50}) => {
           );
         })}
 
-        {/* Needle */}
-        <AnimatedG
-          transform={[
-            { rotate: needleRotation },
-            { translateX: center },
-            { translateY: center },
-          ]}
+        {/* Needle - Fixed Rotation */}
+        <Animated.View
+          style={{
+            position: "absolute",
+            left: center - 5, // Adjust for correct alignment
+            top: center - radius, // Keep the base fixed at the center
+            width: 10,
+            height: radius,
+            transform: [{ rotate: needleRotation }],
+            transformOrigin: "center bottom",
+          }}
         >
-          <Path
-            d="M-6 0 L0 -75 L6 0 Z"
-            fill="url(#needleGrad)"
-            stroke="#555"
-            strokeWidth={0.5}
-          />
-          <Line
-            x1={0}
-            y1={-radius + 30}
-            x2={0}
-            y2={-10}
-            stroke="#fff"
-            strokeWidth={1}
-            opacity={0.3}
-          />
-        </AnimatedG>
+          <Svg width={10} height={radius}>
+            <Path d="M 5 0 L 0 100 L 10 100 Z" fill="red" />
+          </Svg>
+        </Animated.View>
 
-        {/* Center Cap */}
-        <Circle
-          cx={center}
-          cy={center}
-          r={15}
-          fill="url(#centerGrad)"
-          stroke="#333"
-          strokeWidth={2}
-        />
-
-        {/* Glass Overlay */}
-        <Circle
-          cx={center}
-          cy={center}
-          r={radius}
-          fill="url(#glassEffect)"
-        />
-
-        {/* Value Display */}
-        <Text
-          x={center}
-          y={center + 40}
-          textAnchor="middle"
-          fill="#fff"
-          fontSize={28}
-          fontWeight="bold"
-          fontFamily="sans-serif">
-          {percentage}%
-        </Text>
+        {/* Center Cap (Needle Pivot) */}
+        <Circle cx={center} cy={center} r={12} fill="black" stroke="#333" strokeWidth={2} />
       </Svg>
     </View>
   );
@@ -155,9 +98,8 @@ const ProfessionalGauge = ({ percentage = 50}) => {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#080808',
+    alignItems: "center",
+    justifyContent: "center",
     paddingLeft: 30,
   },
 });
