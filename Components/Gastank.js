@@ -42,6 +42,7 @@ const GasMonitor = ({ voltage }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.welcomeText}>Tank Level</Text>
       <View style={styles.row} >
       {/* Tank Section */}
         <View style={styles.tankWrapper}>
@@ -63,7 +64,7 @@ const GasMonitor = ({ voltage }) => {
           </LinearGradient>
           <View style={styles.tankStand} />
         </View>
-        <Gaugemeter needleLength={80}/>
+        <Gaugemeter/>
       </View >
 
       {/* Digital Display */}
@@ -84,9 +85,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0a0a0a',
     alignItems: 'center',
-    paddingTop: 40,
-    width: 400,
+    paddingTop: 20,
+    width: 410,
+    borderRadius: 10
   },
+  welcomeText: {
+    fontSize: 30,
+    fontWeight: '900',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+},
   row : {
     flexDirection : 'row'
   },

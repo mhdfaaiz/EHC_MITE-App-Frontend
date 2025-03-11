@@ -62,7 +62,7 @@ const ProfessionalGauge = ({ percentage = 50}) => {
 
         {/* Progress Track */}
         <Path
-          d={createArc(-135, 135)}
+          d={createArc(-200, 20)}
           stroke="#333"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
@@ -71,7 +71,7 @@ const ProfessionalGauge = ({ percentage = 50}) => {
 
         {/* Progress Fill */}
         <Path
-          d={createArc(-135, -135 + (2.7 * percentage))}
+          d={createArc(-200, -110 + (2.7 * percentage))}
           stroke="url(#progressGrad)"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
@@ -79,8 +79,8 @@ const ProfessionalGauge = ({ percentage = 50}) => {
         />
 
         {/* Graduations */}
-        {Array.from({ length: 61 }).map((_, index) => {
-          const angle = -135 + (index * 4.5);
+        {Array.from({ length: 81 }).map((_, index) => {
+          const angle = -100 + (index * 4.5);
           return (
             <Line
               key={index}

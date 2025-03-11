@@ -28,7 +28,13 @@ export default function SerialNumberPage({ navigation }) {
 
       // Tile data
     const tiles = [
-        { title: 'Real-time table', onPress: () => navigation.navigate('Main') },
+        { title: 'Real-time table', onPress: () => {
+            if (!selectedName) {
+                alert('Please select the field');
+                return;
+            }
+            navigation.navigate('Main', { serialNumber: selectedName });
+        }},
         { title: 'Real-time graph', onPress: () => navigation.navigate('Gaslevel') },
     ];
 

@@ -24,6 +24,7 @@ export default function App({ navigation }) {
 
     return (
         <View style={styles.container}>
+            <Text style={styles.welcomeText}>Real-Time Voltage Graph</Text>
             <Graph style={styles.graph} dataPoints={voltageData} /> 
             <GasTank style={styles.GasTank} voltage={volt} />
         </View>
@@ -33,9 +34,16 @@ export default function App({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#181818',
         alignItems: 'center',
         padding: 20,
+    },
+    welcomeText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 10,
+        textAlign: 'center',
     },
     graph: {
         flex: 1,
