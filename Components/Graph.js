@@ -26,7 +26,7 @@ export default function Graph({ dataPoints = [] }) {
                     datasets: [{ data: dataPoints.length ? dataPoints : Array(6).fill(0) }],
                 }}
                 width={Dimensions.get("window").width - 40}
-                height={240}
+                height={270}
                 yAxisSuffix="V"
                 chartConfig={{
                     backgroundGradientFrom: "#000",

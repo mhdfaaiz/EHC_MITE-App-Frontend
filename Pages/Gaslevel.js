@@ -39,10 +39,10 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     welcomeText: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 35,
+        fontWeight: '900',
         color: '#333',
-        marginBottom: 10,
+        marginBottom: 20,
         textAlign: 'center',
     },
     graph: {

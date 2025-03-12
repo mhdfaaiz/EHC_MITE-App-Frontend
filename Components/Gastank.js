@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, Animated, Easing, Dimensions } from 'react-nati
 import Svg, { Circle, Path, G, Text as SvgText } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
 import Gaugemeter from './Gaugemeter';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const { width } = Dimensions.get('window');
 
 const GasMonitor = ({ voltage }) => {
@@ -15,13 +17,49 @@ const GasMonitor = ({ voltage }) => {
   const safeVoltage = parseVoltage();
   const initialLevel = Math.min(Math.max(Math.round((safeVoltage / 880) * 100), 0), 100);
   const [displayLevel, setDisplayLevel] = useState(initialLevel);
+  const [historicalData, setHistoricalData] = useState([]);
   const heightAnim = useState(new Animated.Value(initialLevel))[0];
+
+  useEffect(() => {
+    // Load the saved level and historical data from AsyncStorage
+    const loadSavedData = async () => {
+      try {
+        const savedLevel = await AsyncStorage.getItem('gasLevel');
+        const savedHistoricalData = await AsyncStorage.getItem('historicalData');
+        if (savedLevel !== null) {
+          const parsedLevel = parseInt(savedLevel, 10);
+          setDisplayLevel(parsedLevel);
+          heightAnim.setValue(parsedLevel);
+        }
+        if (savedHistoricalData !== null) {
+          setHistoricalData(JSON.parse(savedHistoricalData));
+        }
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+
+    loadSavedData();
+  }, []);
 
   useEffect(() => {
     const newLevel = Math.min(Math.max(Math.round((safeVoltage / 880) * 100), 0), 100);
     updateLevel(newLevel);
-    setDisplayLevel(newLevel)
+    setDisplayLevel(newLevel);
+    // Save the new level and update historical data
+    saveData(newLevel);
   }, [safeVoltage]);
+
+  const saveData = async (level) => {
+    try {
+      await AsyncStorage.setItem('gasLevel', level.toString());
+      const updatedHistoricalData = [...historicalData, { level, timestamp: new Date().toISOString() }];
+      await AsyncStorage.setItem('historicalData', JSON.stringify(updatedHistoricalData));
+      setHistoricalData(updatedHistoricalData);
+    } catch (error) {
+      console.error('Failed to save data:', error);
+    }
+  };
 
   const updateLevel = (newLevel) => {
     Animated.parallel([
@@ -39,12 +77,11 @@ const GasMonitor = ({ voltage }) => {
     outputRange: [0, 280],
   });
 
-
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Tank Level</Text>
-      <View style={styles.row} >
-      {/* Tank Section */}
+      <View style={styles.row}>
+        {/* Tank Section */}
         <View style={styles.tankWrapper}>
           <LinearGradient
             colors={['#2a2a2a', '#1a1a1a']}
@@ -64,17 +101,18 @@ const GasMonitor = ({ voltage }) => {
           </LinearGradient>
           <View style={styles.tankStand} />
         </View>
-        <Gaugemeter percentage={initialLevel}/>
-      </View >
-
-      {/* Digital Display */}
-      <View style={styles.displayContainer}>
-        <LinearGradient
-          colors={['#1a1a1a', '#000']}
-          style={styles.displayInner}>
-          <Text style={styles.displayText}>{Math.round(displayLevel)}%</Text>
-          <Text style={styles.displayLabel}>GAS LEVEL</Text>
-        </LinearGradient>
+        <View style={styles.column}>
+          <Gaugemeter percentage={displayLevel} />
+          {/* Digital Display */}
+          <View style={styles.displayContainer}>
+            <LinearGradient
+              colors={['#1a1a1a', '#000']}
+              style={styles.displayInner}>
+              <Text style={styles.displayText}>{Math.round(displayLevel)}%</Text>
+              <Text style={styles.displayLabel}>GAS LEVEL</Text>
+            </LinearGradient>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -87,7 +125,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 20,
     width: 410,
-    borderRadius: 10
+    borderRadius: 10,
+    marginTop: 50,
+    marginBottom: 30,
   },
   welcomeText: {
     fontSize: 30,
@@ -95,9 +135,12 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
     textAlign: 'center',
-},
-  row : {
-    flexDirection : 'row'
+  },
+  column: {
+    flexDirection: 'column',
+  },
+  row: {
+    flexDirection: 'row',
   },
   tankWrapper: {
     alignItems: 'center',
@@ -114,7 +157,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 4,
     borderColor: '#333',
-    marginLeft : 20
+    marginLeft: 20,
   },
   liquid: {
     position: 'absolute',
@@ -148,7 +191,7 @@ const styles = StyleSheet.create({
     marginTop: -10,
     borderWidth: 2,
     borderColor: '#222',
-    marginLeft : 20
+    marginLeft: 20,
   },
   displayContainer: {
     backgroundColor: '#000',
@@ -159,6 +202,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
+    width: 150,
+    height: 100,
+    marginLeft: 50,
   },
   displayInner: {
     borderRadius: 12,
@@ -168,9 +214,9 @@ const styles = StyleSheet.create({
   },
   displayText: {
     color: '#00ff88',
-    fontSize: 36,
+    fontSize: 30,
     fontFamily: 'monospace',
-    letterSpacing: 2,
+    letterSpacing: 1,
   },
   displayLabel: {
     color: '#666',
