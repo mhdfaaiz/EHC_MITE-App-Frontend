@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
-import Svg, { Circle, Path, G, Text as SvgText } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
 import Gaugemeter from './Gaugemeter';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -15,51 +13,15 @@ const GasMonitor = ({ voltage }) => {
   };
 
   const safeVoltage = parseVoltage();
-  const initialLevel = Math.min(Math.max(Math.round((safeVoltage / 880) * 100), 0), 100);
+  const initialLevel = Math.min(Math.max(Math.round((safeVoltage/880) *100, 0)), 100);
   const [displayLevel, setDisplayLevel] = useState(initialLevel);
-  const [historicalData, setHistoricalData] = useState([]);
   const heightAnim = useState(new Animated.Value(initialLevel))[0];
 
   useEffect(() => {
-    // Load the saved level and historical data from AsyncStorage
-    const loadSavedData = async () => {
-      try {
-        const savedLevel = await AsyncStorage.getItem('gasLevel');
-        const savedHistoricalData = await AsyncStorage.getItem('historicalData');
-        if (savedLevel !== null) {
-          const parsedLevel = parseInt(savedLevel, 10);
-          setDisplayLevel(parsedLevel);
-          heightAnim.setValue(parsedLevel);
-        }
-        if (savedHistoricalData !== null) {
-          setHistoricalData(JSON.parse(savedHistoricalData));
-        }
-      } catch (error) {
-        console.error('Failed to load data:', error);
-      }
-    };
-
-    loadSavedData();
-  }, []);
-
-  useEffect(() => {
-    const newLevel = Math.min(Math.max(Math.round((safeVoltage / 880) * 100), 0), 100);
+    const newLevel = Math.min(Math.max(Math.round((safeVoltage/880) *100, 0)), 100);
     updateLevel(newLevel);
     setDisplayLevel(newLevel);
-    // Save the new level and update historical data
-    saveData(newLevel);
   }, [safeVoltage]);
-
-  const saveData = async (level) => {
-    try {
-      await AsyncStorage.setItem('gasLevel', level.toString());
-      const updatedHistoricalData = [...historicalData, { level, timestamp: new Date().toISOString() }];
-      await AsyncStorage.setItem('historicalData', JSON.stringify(updatedHistoricalData));
-      setHistoricalData(updatedHistoricalData);
-    } catch (error) {
-      console.error('Failed to save data:', error);
-    }
-  };
 
   const updateLevel = (newLevel) => {
     Animated.parallel([
@@ -79,28 +41,6 @@ const GasMonitor = ({ voltage }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Tank Level</Text>
-      <View style={styles.row}>
-        {/* Tank Section */}
-        <View style={styles.tankWrapper}>
-          <LinearGradient
-            colors={['#2a2a2a', '#1a1a1a']}
-            style={styles.tankOuter}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}>
-            <Animated.View style={[styles.liquid, { height: liquidHeight }]}>
-              <LinearGradient
-                colors={['#00f2fe', '#0056ff']}
-                style={StyleSheet.absoluteFill}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
-              />
-              <View style={styles.liquidHighlight} />
-            </Animated.View>
-            <View style={styles.tankOverlay} />
-          </LinearGradient>
-          <View style={styles.tankStand} />
-        </View>
         <View style={styles.column}>
           <Gaugemeter percentage={displayLevel} />
           {/* Digital Display */}
@@ -113,7 +53,6 @@ const GasMonitor = ({ voltage }) => {
             </LinearGradient>
           </View>
         </View>
-      </View>
     </View>
   );
 };
@@ -121,13 +60,11 @@ const GasMonitor = ({ voltage }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
     alignItems: 'center',
-    paddingTop: 20,
-    width: 410,
+    paddingTop: 10,
+    width: '100%',
     borderRadius: 10,
-    marginTop: 50,
-    marginBottom: 30,
+    backgroundColor  : '#101010'
   },
   welcomeText: {
     fontSize: 30,
@@ -142,57 +79,6 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
   },
-  tankWrapper: {
-    alignItems: 'center',
-    shadowColor: '#00f4ff',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    marginBottom: 30,
-  },
-  tankOuter: {
-    width: 150,
-    height: 280,
-    borderRadius: 30,
-    overflow: 'hidden',
-    borderWidth: 4,
-    borderColor: '#333',
-    marginLeft: 20,
-  },
-  liquid: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    overflow: 'hidden',
-  },
-  liquidHighlight: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    right: 10,
-    height: 30,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 15,
-  },
-  tankOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    borderWidth: 6,
-    borderColor: 'rgba(0,0,0,0.15)',
-    borderRadius: 30,
-  },
-  tankStand: {
-    width: 140,
-    height: 20,
-    backgroundColor: '#333',
-    borderRadius: 5,
-    marginTop: -10,
-    borderWidth: 2,
-    borderColor: '#222',
-    marginLeft: 20,
-  },
   displayContainer: {
     backgroundColor: '#000',
     borderRadius: 15,
@@ -203,8 +89,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     width: 150,
-    height: 100,
-    marginLeft: 50,
+    height: 80,
+    marginLeft: 80,
   },
   displayInner: {
     borderRadius: 12,
@@ -214,7 +100,7 @@ const styles = StyleSheet.create({
   },
   displayText: {
     color: '#00ff88',
-    fontSize: 30,
+    fontSize: 25,
     fontFamily: 'monospace',
     letterSpacing: 1,
   },

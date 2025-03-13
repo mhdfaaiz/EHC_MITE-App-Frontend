@@ -4,19 +4,22 @@ import React, { useEffect, useState } from "react";
 import Graph from "../Components/Graph";
 import GasTank from "../Components/Gastank";
 
-export default function App({ navigation }) {
+export default function App({ route, navigation }) {
     const [voltageData, setVoltageData] = useState([0, 0, 0, 0, 0, 0]); // Default array
     const [volt, setVolt] = useState();
+    const serialNumber = route.params?.serialNumber;
 
     useEffect(() => {
         const socket = io("https://soniciot.com");
 
         socket.on("voltage", (data) => {
             data = JSON.parse(data);
-            setVolt(data.voltage);
-            if (data && data.voltage !== undefined) {
-                setVoltageData((prevData) => [...prevData.slice(1), data.voltage]); // Keep last 6 values
-            }
+            if (data.serial ==serialNumber) {
+                setVolt(data.voltage);
+                if (data && data.voltage !== undefined) {
+                    setVoltageData((prevData) => [...prevData.slice(1), data.voltage]); // Keep last 6 values
+
+            }}
         });
 
         return () => socket.disconnect(); // Clean up on unmount
@@ -39,7 +42,7 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     welcomeText: {
-        fontSize: 35,
+        fontSize: 25,
         fontWeight: '900',
         color: '#333',
         marginBottom: 20,
@@ -57,13 +60,6 @@ const styles = StyleSheet.create({
         height: 150,
         resizeMode: 'contain',
         marginBottom: 20,
-    },
-    welcomeText: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 10,
-        textAlign: 'center',
     },
     subText: {
         fontSize: 16,

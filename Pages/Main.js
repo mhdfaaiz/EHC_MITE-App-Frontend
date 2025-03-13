@@ -277,16 +277,35 @@ const IndicatorApp = ({ route, navigation }) => {
     }, [indicatorname]);
 
 
-    const renderItem = ({ item }) => (
-        <View style={styles.row}>
-            <Text style={[styles.celll, styles.col1]}>{item.id}</Text>
-            <Text style={[styles.celll, styles.col2]}>{new Date(item.registered_at).toLocaleString()}</Text>
-            <Text style={[styles.celll, styles.col3]}>{item.event}</Text>
-            <Text style={[styles.celll, styles.col4]}>{item.parameter}</Text>
-            <Text style={[styles.celll, styles.col5]}>{item.value}</Text>
-            <Text style={[styles.celll, styles.col6]}>{item.device}</Text>
-        </View>
-    );
+    const renderItem = ({ item }) => {
+        // Function to get the indicator name based on the parameter value
+        const getIndicatorName = (parameter) => {
+            switch (parameter) {
+                case 'DI1':
+                    return indicatorname[0].name; // Access the 'name' property
+                case 'DI2':
+                    return indicatorname[1].name; // Access the 'name' property
+                case 'DI3':
+                    return indicatorname[2].name; // Access the 'name' property
+                case 'DI4':
+                    return indicatorname[3].name; // Access the 'name' property
+                default:
+                    return parameter; // Return the original parameter if no match is found
+            }
+        };
+
+    
+        return (
+            <View style={styles.row}>
+                <Text style={[styles.celll, styles.col1]}>{item.id}</Text>
+                <Text style={[styles.celll, styles.col2]}>{new Date(item.registered_at).toLocaleString()}</Text>
+                <Text style={[styles.celll, styles.col3]}>
+                    {item.event === 'ALARM HIGH' ? 'ALARM ON' : item.event === 'ALARM LOW' ? 'ALARM OFF' : item.event}
+                </Text>
+                <Text style={[styles.celll, styles.col4]}>{getIndicatorName(item.parameter)}</Text>
+            </View>
+        );
+    };
 
 
     if (loading) {
@@ -445,6 +464,12 @@ const IndicatorApp = ({ route, navigation }) => {
 
                 {currentView === 'logs' && (
                     <>
+                        <View style={styles.header}>
+                            <Text style={[styles.heading, styles.si]}>NO</Text>
+                            <Text style={[styles.heading, styles.dt]}>DATE&TIME</Text>
+                            <Text style={[styles.heading, styles.al]}>ALARM</Text>
+                            <Text style={[styles.heading, styles.st]}>STATUS</Text>
+                        </View>
 
                         <FlatList
                             ref={flatListRef}
@@ -605,13 +630,13 @@ const styles = StyleSheet.create({
     indicatorRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        width: '90%',
+        width: '100%',
     },
     indicatornameRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         marginBottom: 20,
-        width: '90%',
+        width: '80%',
     },
     indicatorWrapper: {
         alignItems: 'center',
@@ -619,9 +644,11 @@ const styles = StyleSheet.create({
     },
     label: {
         marginTop: 5,
-        fontSize: 14,
+        fontSize: 13,
         color: 'white',
         fontWeight: 'bold',
+        width : '80%',
+        textAlign : 'center',
     },
     textInput: {
         borderBottomWidth: 1,
@@ -706,6 +733,28 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         color: 'white',
     },
+    si: {
+        width: '15%',
+        textAlign: 'left',
+        color: 'white',
+    },
+    dt: {
+        width: '15%',
+        textAlign: 'left',
+        marginRight : '10%',
+        color: 'white',
+    },
+    al: {
+        width: '25%',
+        textAlign: 'left',
+        color: 'white',
+    },
+    st: {
+        width: '30%',
+        textAlign: 'left',
+        color: 'white',
+        marginRight : '10%'
+    },
     cell: {
         textAlign: 'center',
         fontSize: 14,
@@ -718,21 +767,16 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     col1: {
-        width: '10%'
+        width: '15%'
     },
     col2: {
-        width: '25%'
+        width: '30%'
     },
     col3: {
         width: '20%'
     },
     col4: {
-        width: '10%'
-    },
-    col5: {
-        width: '5%'
-    },
-    col6: {
+        marginLeft : '5%',
         width: '30%'
     },
     dateCell: {
@@ -740,6 +784,7 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         paddingHorizontal: 10,
         color: 'white',
+        marginLeft : 10
     },
     dataCell: {
         flex: 2,

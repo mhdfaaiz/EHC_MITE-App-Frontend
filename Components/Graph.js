@@ -6,28 +6,37 @@ export default function Graph({ dataPoints = [] }) {
     const [labels, setLabels] = useState([]);
 
     useEffect(() => {
-        // Generate time labels for the last 6 readings
+        // Generate time labels with date for the first label and time for the rest
         const getTimeLabels = () => {
             const now = new Date();
             return Array.from({ length: 6 }, (_, i) => {
                 const time = new Date(now.getTime() - (5 - i) * 60000); // 1-minute interval
-                return `${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`;
+                const day = time.getDate().toString().padStart(2, '0');
+                const month = (time.getMonth() + 1).toString().padStart(2, '0');
+                const hours = time.getHours().toString().padStart(2, '0');
+                const minutes = time.getMinutes().toString().padStart(2, '0');
+
+                // Add date to the first label and time to the rest
+                return i === 0 ? `${day}/${month} ->  ${hours}:${minutes}     ` : `${hours}:${minutes}`;
             });
         };
 
         setLabels(getTimeLabels());
     }, [dataPoints]); // Update labels when data changes
 
+    // Map voltage values to percentage values
+    const percentageDataPoints = dataPoints.map(point => (point/880) *100);
+
     return (
         <View>
             <LineChart
                 data={{
                     labels: labels,
-                    datasets: [{ data: dataPoints.length ? dataPoints : Array(6).fill(0) }],
+                    datasets: [{ data: percentageDataPoints.length ? percentageDataPoints : Array(6).fill(0) }],
                 }}
                 width={Dimensions.get("window").width - 40}
-                height={270}
-                yAxisSuffix="V"
+                height={240}
+                yAxisSuffix="%"
                 chartConfig={{
                     backgroundGradientFrom: "#000",
                     backgroundGradientTo: "#333",

@@ -71,11 +71,11 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Main" component={Main} />
-        <Stack.Screen name="Choose" component={Choose} />
+        <Stack.Screen name="Alarms" component={Main} />
+        <Stack.Screen name="Main" component={Choose} />
         <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="Notification" component={Notification} />
-        <Stack.Screen name="Gaslevel" component={Gaslevel} />
+        <Stack.Screen name="GasLevel" component={Gaslevel} />
         <Stack.Screen name="Graph" component={Graph} />
         <Stack.Screen name="GasTank" component={GasTank} />
       </Stack.Navigator>

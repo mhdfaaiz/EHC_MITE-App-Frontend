@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet } from "react-native";
-import Svg, { Circle, Path, Line, Defs, LinearGradient, Stop } from "react-native-svg";
+import Svg, { Circle, Path, Line, Defs, LinearGradient, Stop, Text as SvgText } from "react-native-svg";
 
 const ProfessionalGauge = ({ percentage = 0 }) => {
-  const size = 200;
+  const size = 250;
   const strokeWidth = 25;
   const center = size / 2;
   const radius = center - strokeWidth;
@@ -53,9 +53,6 @@ const ProfessionalGauge = ({ percentage = 0 }) => {
         {/* Progress Track */}
         <Path d={createArc(-220, 40)} stroke="#333" strokeWidth={strokeWidth} strokeLinecap="round" fill="none" />
 
-        {/* Progress Fill */}
-        
-
         {/* Graduations */}
         {Array.from({ length: 61 }).map((_, index) => {
           const angle = -225 + index * 4.5;
@@ -69,6 +66,36 @@ const ProfessionalGauge = ({ percentage = 0 }) => {
               stroke={index % 10 === 0 ? "#fff" : "#666"}
               strokeWidth={index % 10 === 0 ? 2 : 1}
             />
+          );
+        })}
+
+        {/* Labels */}
+        {[
+          { value: 0, angle: -225 },
+          { value: 50, angle: -90 },
+          { value: '', angle: -45 },
+          { value: '', angle: 0 },
+          { value: 100, angle: 45 },
+          { value: 0, angle: 135 },
+          { value: '', angle: 180 },
+          { value: '', angle: 225 },
+        ].map(({ value, angle }, index) => {
+          const x = center + (radius - 40) * Math.cos((angle * Math.PI) / 180);
+          const y = center + (radius - 40) * Math.sin((angle * Math.PI) / 180);
+          return (
+            <SvgText
+              key={index}
+              x={x}
+              y={y}
+              fill="#fff"
+              fontSize="12"
+              fontWeight="bold"
+              textAnchor="middle"
+              alignmentBaseline="middle"
+              transform={`rotate(${angle + 90}, ${x}, ${y})`}
+            >
+              {value}
+            </SvgText>
           );
         })}
 

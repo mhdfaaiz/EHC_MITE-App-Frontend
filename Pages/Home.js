@@ -1,86 +1,116 @@
-import { StyleSheet, Text, Button, View, Image, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, Button, View, Image, TouchableOpacity, ImageBackground, Dimensions, SafeAreaView } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 export default function App({ navigation }) {
     return (
-        <View style={styles.container}>
-            {/* Logo Section */}
-            <View style={[styles.logoContainer, styles.elevation]}>
-                <Image 
-                    style={styles.logo} 
-                    source={require('../assets/adnoc.png')} 
-                    resizeMode="contain"
-                /> 
-            </View>
+        <ImageBackground
+            source={require("../assets/adnoc-background.png")}
+            style={styles.background}
+            resizeMode="cover"
+        >
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.container}>
+                    {/* Logo Section */}
+                    <View style={[styles.logoContainer, styles.elevation]}>
+                        <Image 
+                            style={styles.logo} 
+                            source={require('../assets/adnoc.png')} 
+                            resizeMode="contain"
+                        /> 
+                    </View>
 
-            {/* Welcome Text */}
-            <Text style={styles.welcomeText}>Welcome to Gas Panel Monitor</Text>
-            <Text style={styles.subText}>Powered by SONIC</Text>
-
-            {/* Navigation Button for New Page */}
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('Choose')}
-            >
-                <Text style={styles.buttonText}>Go to Main Page</Text>
-            </TouchableOpacity>
-        </View>
+                    {/* Welcome Text */}
+                    <Text style={styles.welcomeText}>ENERGY FOR LIFE</Text>
+                    <Text style={styles.welcomeTextarabic}>الطاقة للحياة</Text>
+                    
+                </View>
+                {/* Navigation Button for New Page */}
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('Main')}
+                >
+                    <Text style={styles.buttonText}>Go to Main Page</Text>
+                </TouchableOpacity>
+                <Text style={styles.subText}>Powered by SONIC</Text>
+            </SafeAreaView>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
+    background: {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+    },
+    safeArea: {
+        flex: 1,
+    },
     container: {
         flex: 1,
-        backgroundColor: '#181818',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20,
     },
     logoContainer: {
-        width : 200 ,
+        width: width * 0.3,
+        height: height * 0.2,
         alignItems: 'center',
-        backgroundColor: 'white',
-        borderRadius: 5,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.4)',
+        borderRadius: 10,
         padding: 15,
         marginBottom: 30,
+        marginTop: 60,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 15,
-      },
-      elevation: {
-        elevation: 20,
+    },
+    elevation: {
+        elevation: 50,
         shadowColor: '#000',
-      },
+    },
     logo: {
-        width: 350,
-        height: 150,
+        width: '100%',
+        height: '100%',
         resizeMode: 'contain',
-        marginBottom: 20,
-        borderCurve: 'circular'
     },
     welcomeText: {
         fontSize: 24,
-        fontWeight: 'bold',
-        color: '#333',
+        fontWeight: '900',
+        color: 'rgba(255, 255, 255, 0.4)',
+        textAlign: 'center',
+        width: '80%'
+    },
+    welcomeTextarabic: {
+        fontSize: 37,
+        fontWeight: '900',
+        color: 'rgba(255, 255, 255, 0.4)',
         marginBottom: 10,
         textAlign: 'center',
     },
     subText: {
         fontSize: 16,
-        color: '#555',
-        marginBottom: 30,
+        color: 'rgba(255, 255, 255, 0.4)',
         textAlign: 'center',
+        marginBottom: 30
     },
     button: {
-        backgroundColor: '#3d3b3b',
+        backgroundColor: 'rgba(48, 92, 237, 0.5)',
         paddingVertical: 15,
         paddingHorizontal: 40,
-        borderRadius: 25,
+        borderRadius: 15,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.2,
         shadowRadius: 5,
         elevation: 5,
+        marginBottom: 20,
+        width: width * 0.8,
+        alignSelf: 'center'
     },
     buttonText: {
         fontSize: 16,
