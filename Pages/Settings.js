@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Switch, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Switch, ScrollView ,Image} from 'react-native';
 
 export default function SettingsPage({ route, navigation }) {
     const { serialNumber, indicatorNames, reverseState, onUpdate } = route.params;
@@ -49,6 +49,11 @@ export default function SettingsPage({ route, navigation }) {
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.container}>
+                <Image 
+                    style={styles.logo} 
+                    source={require('../assets/adnoclogo.png')} // Change this to your image path
+                    resizeMode="contain"
+                />
                 <Text style={styles.pageTitle}>Settings</Text>
 
                 <View style={styles.card}>
@@ -105,6 +110,7 @@ export default function SettingsPage({ route, navigation }) {
                 <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>Submit</Text>
                 </TouchableOpacity>
+                <Text style={styles.subTextdown}>Powered by SONIC</Text>
             </View>
         </ScrollView>
     );
@@ -116,6 +122,22 @@ const styles = StyleSheet.create({
         backgroundColor: '#121212', // Dark background
         alignItems: 'center',
         padding: 20,
+    },
+    logo: {
+        position: 'absolute',
+        width: 30,
+        height: 50,
+        resizeMode: 'contain',
+        opacity : 0.8,
+        left : 10,
+        top : 10
+    },
+    subTextdown: {
+        fontSize: 12,
+        color: 'rgba(255, 255, 255, 0.4)',
+        textAlign: 'center',
+        marginBottom: 10,
+        marginTop: 10
     },
     pageTitle: {
         fontSize: 36,

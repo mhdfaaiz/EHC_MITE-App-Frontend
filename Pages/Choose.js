@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, Image } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
+import Icon from 'react-native-vector-icons/Ionicons';
+import Menu from 'react-native-vector-icons/Entypo';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function SerialNumberPage({ navigation }) {
     const [selectedName, setSelectedName] = useState(null);
     const [items, setItems] = useState([]);
 
-    useEffect(() => {
+    const fetchSerialList = () => {
         fetch('https://soniciot.com/api/Serial_List')
             .then((response) => response.json())
             .then((data) => {
@@ -18,7 +21,17 @@ export default function SerialNumberPage({ navigation }) {
                 setItems(sortedData.map((item) => ({ label: item.name, value: item.serial_number })));
             })
             .catch((error) => console.error(error));
+    };
+
+    useEffect(() => {
+        fetchSerialList();
     }, []);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchSerialList();
+        }, [])
+    );
 
     // Tile data
     const tiles = [
@@ -44,6 +57,15 @@ export default function SerialNumberPage({ navigation }) {
             style={styles.background}
             resizeMode="cover"
         >
+            <View style={styles.first}>                        
+                <Image 
+                    style={styles.logo} 
+                    source={require('../assets/adnoclogo.png')} // Change this to your image path
+                    resizeMode="contain"
+                />
+                <Menu style={styles.settings} name="menu" size={40} color="rgba(255, 255, 255, 0.8)" onPress={() => navigation.navigate('Changefield')}/>
+            </View>
+
             <View style={styles.container}>
                 <Text style={styles.title}>Select Your Device</Text>
                 <Text style={styles.subText}>Choose from the list below to proceed</Text>
@@ -74,6 +96,7 @@ export default function SerialNumberPage({ navigation }) {
                     ))}
                 </View>
             </View>
+            <Text style={styles.subTextdown}>Powered by SONIC</Text>
         </ImageBackground>
     );
 }
@@ -84,11 +107,45 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
+    settings: {
+        position: 'absolute',
+        right: 10,
+        top: 10,
+    },
+    first: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
+    },
+    subTextlogo: {
+        fontSize: 10,
+        color: 'rgba(0, 0, 0, 0.4)',
+        textAlign: 'center',
+        marginBottom: 30
+    },
+    subTextdown: {
+        fontSize: 16,
+        color: 'rgba(255, 255, 255, 0.4)',
+        textAlign: 'center',
+        marginBottom: 30
+    },
+    elevation: {
+        elevation: 50,
+        shadowColor: '#000',
+    },
+    logo: {
+        width: 40,
+        height: 60,
+        resizeMode: 'contain',
+        opacity : 0.8,
+        margin : 10
     },
     title: {
         fontSize: 28,

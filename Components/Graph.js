@@ -25,7 +25,7 @@ export default function Graph({ dataPoints = [] }) {
     }, [dataPoints]); // Update labels when data changes
 
     // Map voltage values to percentage values
-    const percentageDataPoints = dataPoints.map(point => (point/880) *100);
+    const percentageDataPoints = dataPoints.map(point => (point/890) *100);
 
     return (
         <View>

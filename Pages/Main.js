@@ -3,6 +3,7 @@ import { View, Animated, StyleSheet, TouchableOpacity, Text, SafeAreaView, Image
 const { io } = require("socket.io-client");
 import Icon from 'react-native-vector-icons/Ionicons';
 import { createElement } from 'react-native';
+import SignalDisplay from '../Components/signalDisplay';
 
 
 const IndicatorApp = ({ route, navigation }) => {
@@ -327,7 +328,7 @@ const IndicatorApp = ({ route, navigation }) => {
 
     const boxStyle = {
         ...styles.box,
-        height: currentView === 'logs' ? '50%' : '50%',
+        height: currentView === 'logs' ? '42%' : '45%',
         marginTop: currentView === 'logs' ? 30 : 10
     };
     const handleNextPage = () => {
@@ -353,57 +354,66 @@ const IndicatorApp = ({ route, navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.first}>
-                <Icon style={styles.settings} name="settings-outline" size={30} color="gray" onPress={handleNextPage} />
+                
+                    <Image 
+                    style={styles.logo} 
+                    source={require('../assets/adnoclogo.png')} // Change this to your image path
+                    resizeMode="contain"
+                    />
+                    <Icon style={styles.settings} name="settings-outline" size={30} color="gray" onPress={handleNextPage} />
             </View>
+            
             <View style={styles.intro}>
                 <View style={styles.serialbox}>
                     <Text style={styles.serialno}>{connectionState.serialNo || serialNumber}</Text>
                 </View>
 
-                <Text style={[styles.statusText, { color: connectionState.color }]}>
-                    {connectionState.color === '#16b800' ? 'ONLINE' : 'OFFLINE'}
-                </Text>
-
+                <View style={styles.statusContainer}>
+                    <Text style={[styles.statusText, { color: connectionState.color }]}>
+                        {connectionState.color === '#16b800' ? 'ONLINE' : 'OFFLINE'}
+                    </Text>
+                    <SignalDisplay serialNo={serialNumber} />
+                </View>
             </View>
-            <View style={styles.indicatorRow}>
-                {iconNames.map((name, index) => (
-                    <View key={index} style={styles.indicatorWrapper}>
-                        {/* Outer Bezel */}
-                        <View style={styles.outerBezel}>
-                            {/* Reflection Effect */}
-                            <View style={styles.reflection} />
 
-                            {/* Outer Ring */}
-                            <View style={styles.outerRing}>
-                                {/* Inner Glow */}
+            <View style={styles.indicatorContainer}>
+                <View style={styles.indicatorRow}>
+                    {iconNames.map((name, index) => (
+                        <View key={index} style={styles.indicatorWrapper}>
+                            {/* Outer Bezel */}
+                            <View style={styles.outerBezel}>
+                                {/* Reflection Effect */}
+                                <View style={styles.reflection} />
 
-                                <View
-                                    style={[
-                                        styles.innerGlow,
-                                        { backgroundColor: getIndicatorColor(name) || 'grey' },
-                                    ]}
-                                />
+                                {/* Outer Ring */}
+                                <View style={styles.outerRing}>
+                                    {/* Inner Glow */}
+                                    <View
+                                        style={[
+                                            styles.innerGlow,
+                                            { backgroundColor: getIndicatorColor(name) || 'grey' },
+                                        ]}
+                                    />
 
-
-                                {/* Main Indicator */}
-                                <View
-                                    style={[
-                                        styles.indicator,
-                                        { backgroundColor: getIndicatorColor(name) || 'grey' },
-                                    ]}
-                                />
+                                    {/* Main Indicator */}
+                                    <View
+                                        style={[
+                                            styles.indicator,
+                                            { backgroundColor: getIndicatorColor(name) || 'grey' },
+                                        ]}
+                                    />
+                                </View>
                             </View>
                         </View>
-
-                    </View>
-                ))}
-            </View>
-            <View style={styles.indicatornameRow}>
-                {indicatorname.map((indicator) => (
-                    <View key={indicator.id} style={styles.indicatorWrapper}>
-                        <Text style={styles.label}>{indicator.name}</Text>
-                    </View>
-                ))}
+                    ))}
+                </View>
+                <View style={styles.indicatornameRow}>
+                    {indicatorname.map((indicator) => (
+                        <View key={indicator.id} style={styles.indicatorWrapper}>
+                            <Text style={styles.label}>{indicator.name}</Text>
+                        </View>
+                    ))}
+                </View>
             </View>
             <View style={styles.switchbuttons}>
                 <Animated.View style={{ transform: [{ scale: getScaleValue('live') }] }}>
@@ -490,7 +500,7 @@ const IndicatorApp = ({ route, navigation }) => {
                     </>
                 )}
             </View>
-
+                <Text style={styles.subTextdown}>Powered by SONIC</Text>
         </SafeAreaView>
     );
 };
@@ -502,22 +512,30 @@ const styles = StyleSheet.create({
         backgroundColor: '#181818',
         padding: 20,
     },
+    logo: {
+        width: 30,
+        height: 50,
+        resizeMode: 'contain',
+        opacity : 0.8,
+        marginBottom: 20
+    },
     loadingtext: {
         color: 'white'
     },
-    errorText: {
-        color: 'red',
-        fontSize: 16,
+    subTextdown: {
+        fontSize: 12,
+        color: 'rgba(255, 255, 255, 0.4)',
+        textAlign: 'center',
+        marginBottom: 30
+    },
+    SignalDisplay:{
+        
     },
     first: {
         width: '100%',
         flexDirection: 'row',
-    },
-    logo: {
-        marginBottom: 20,
-        marginLeft: 70,
-        width: 100,
-        height: 25,
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     settings: {
         marginBottom: 20
@@ -552,10 +570,13 @@ const styles = StyleSheet.create({
         textShadowRadius: 10, // Create a glowing effect
     },
     statusText: {
-        marginLeft: 70,
+        marginLeft: 10,
         fontSize: 20,
         fontWeight: 'bold',
         marginTop: 5
+    },
+    statusContainer: {
+        alignItems: 'center',
     },
     top: {
         flexDirection: 'row',
@@ -627,28 +648,30 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
     },
+    indicatorContainer: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     indicatorRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
     },
     indicatornameRow: {
         flexDirection: 'row',
-        justifyContent: 'center',
-        marginBottom: 20,
-        width: '80%',
+        marginBottom: 20
     },
     indicatorWrapper: {
-        alignItems: 'center',
-        marginHorizontal: 10,
+        marginHorizontal: '3%',
+        alignItems: 'center', 
+        width: 70, 
     },
     label: {
         marginTop: 5,
         fontSize: 13,
         color: 'white',
         fontWeight: 'bold',
-        width : '80%',
-        textAlign : 'center',
+        width: '100%', 
+        textAlign: 'center',
     },
     textInput: {
         borderBottomWidth: 1,

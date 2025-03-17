@@ -22,7 +22,7 @@ const ProfessionalGauge = ({ percentage = 0 }) => {
   // Interpolating Rotation for the Needle
   const needleRotation = rotation.interpolate({
     inputRange: [0, 100],
-    outputRange: ["-135deg", "135deg"], // Define rotation range
+    outputRange: ['-143deg', '142deg'], // Adjusted rotation range
   });
 
   // Arc Path Function
@@ -51,16 +51,16 @@ const ProfessionalGauge = ({ percentage = 0 }) => {
         <Circle cx={center} cy={center} r={radius} fill="#1a1a1a" stroke="#333" strokeWidth={2} />
 
         {/* Progress Track */}
-        <Path d={createArc(-220, 40)} stroke="#333" strokeWidth={strokeWidth} strokeLinecap="round" fill="none" />
+        <Path d={createArc(-235, 55)} stroke="#333" strokeWidth={strokeWidth} strokeLinecap="round" fill="none" />
 
         {/* Graduations */}
-        {Array.from({ length: 61 }).map((_, index) => {
-          const angle = -225 + index * 4.5;
+        {Array.from({ length: 101 }).map((_, index) => {
+          const angle = -233 + (285 / 100) * index; // Adjusted angle for 101 graduations
           return (
             <Line
               key={index}
-              x1={center + (radius - (index % 5 === 0 ? 25 : 15)) * Math.cos((angle * Math.PI) / 180)}
-              y1={center + (radius - (index % 5 === 0 ? 25 : 15)) * Math.sin((angle * Math.PI) / 180)}
+              x1={center + (radius - (index % 10 === 0 ? 25 : 15)) * Math.cos((angle * Math.PI) / 180)}
+              y1={center + (radius - (index % 10 === 0 ? 25 : 15)) * Math.sin((angle * Math.PI) / 180)}
               x2={center + (radius - 5) * Math.cos((angle * Math.PI) / 180)}
               y2={center + (radius - 5) * Math.sin((angle * Math.PI) / 180)}
               stroke={index % 10 === 0 ? "#fff" : "#666"}
@@ -70,16 +70,9 @@ const ProfessionalGauge = ({ percentage = 0 }) => {
         })}
 
         {/* Labels */}
-        {[
-          { value: 0, angle: -225 },
-          { value: 50, angle: -90 },
-          { value: '', angle: -45 },
-          { value: '', angle: 0 },
-          { value: 100, angle: 45 },
-          { value: 0, angle: 135 },
-          { value: '', angle: 180 },
-          { value: '', angle: 225 },
-        ].map(({ value, angle }, index) => {
+        {Array.from({ length: 11 }).map((_, index) => {
+          const value = index * 10;
+          const angle = -230 + (285 / 10) * index; // Adjusted angle for 11 labels (0 to 100)
           const x = center + (radius - 40) * Math.cos((angle * Math.PI) / 180);
           const y = center + (radius - 40) * Math.sin((angle * Math.PI) / 180);
           return (
@@ -127,7 +120,6 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    paddingLeft: 30,
   },
 });
 

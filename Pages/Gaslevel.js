@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity ,Image} from "react-native";
 const { io } = require("socket.io-client");
 import React, { useEffect, useState } from "react";
 import Graph from "../Components/Graph";
@@ -21,15 +21,18 @@ export default function App({ route, navigation }) {
 
             }}
         });
+        
 
         return () => socket.disconnect(); // Clean up on unmount
     }, []);
 
     return (
         <View style={styles.container}>
-            <Text style={styles.welcomeText}>Real-Time Voltage Graph</Text>
+            <Text style={styles.welcomeText}>GAS LEVEL MONITOR</Text>
             <Graph style={styles.graph} dataPoints={voltageData} /> 
             <GasTank style={styles.GasTank} voltage={volt} />
+
+            <Text style={styles.subTextdown}>Powered by SONIC</Text>
         </View>
     );
 }
@@ -42,9 +45,9 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     welcomeText: {
-        fontSize: 25,
+        fontSize: 20,
         fontWeight: '900',
-        color: '#333',
+        color: 'rgba(255, 255, 255, 0.4)',
         marginBottom: 20,
         textAlign: 'center',
     },
@@ -54,12 +57,6 @@ const styles = StyleSheet.create({
     },
     GasTank : {
         borderCurve: 30
-    },
-    logo: {
-        width: 350,
-        height: 150,
-        resizeMode: 'contain',
-        marginBottom: 20,
     },
     subText: {
         fontSize: 16,
@@ -83,6 +80,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#fff',
         textAlign: 'center',
+    },
+    subTextdown: {
+        fontSize: 11,
+        color: 'rgba(255, 255, 255, 0.4)',
+        textAlign: 'center',
+        marginLeft: 20,
+        marginTop: 5
     },
 });
 

@@ -1,8 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, Button, View, Image, TouchableOpacity, ImageBackground, Dimensions, SafeAreaView } from 'react-native';
-
-const { width, height } = Dimensions.get('window');
-
+import SignalDisplay from '../Components/signalDisplay';
 export default function App({ navigation }) {
     return (
         <ImageBackground
@@ -20,10 +18,8 @@ export default function App({ navigation }) {
                             resizeMode="contain"
                         /> 
                     </View>
-
                     {/* Welcome Text */}
                     <Text style={styles.welcomeText}>ENERGY FOR LIFE</Text>
-                    <Text style={styles.welcomeTextarabic}>الطاقة للحياة</Text>
                     
                 </View>
                 {/* Navigation Button for New Page */}
@@ -55,17 +51,16 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     logoContainer: {
-        width: width * 0.3,
-        height: height * 0.2,
+        width: '35%',
+        height: '36%',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(255, 255, 255, 0.4)',
-        borderRadius: 10,
+        borderRadius: 2,
         padding: 15,
         marginBottom: 30,
         marginTop: 60,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 15,
     },
@@ -74,8 +69,8 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
     },
     logo: {
-        width: '100%',
-        height: '100%',
+        width: 200,
+        height: 300,
         resizeMode: 'contain',
     },
     welcomeText: {
@@ -84,13 +79,6 @@ const styles = StyleSheet.create({
         color: 'rgba(255, 255, 255, 0.4)',
         textAlign: 'center',
         width: '80%'
-    },
-    welcomeTextarabic: {
-        fontSize: 37,
-        fontWeight: '900',
-        color: 'rgba(255, 255, 255, 0.4)',
-        marginBottom: 10,
-        textAlign: 'center',
     },
     subText: {
         fontSize: 16,
@@ -104,12 +92,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 40,
         borderRadius: 15,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.2,
         shadowRadius: 5,
         elevation: 5,
         marginBottom: 20,
-        width: width * 0.8,
+        width: '70%',
         alignSelf: 'center'
     },
     buttonText: {
