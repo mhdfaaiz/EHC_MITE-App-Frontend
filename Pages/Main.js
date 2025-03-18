@@ -328,7 +328,7 @@ const IndicatorApp = ({ route, navigation }) => {
 
     const boxStyle = {
         ...styles.box,
-        height: currentView === 'logs' ? '42%' : '45%',
+        height: currentView === 'logs' ? '40%' : '43%',
         marginTop: currentView === 'logs' ? 30 : 10
     };
     const handleNextPage = () => {
