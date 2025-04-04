@@ -51,7 +51,7 @@ export default function SettingsPage({ route, navigation }) {
             <View style={styles.container}>
                 <Image 
                     style={styles.logo} 
-                    source={require('../assets/adnoclogo.png')} // Change this to your image path
+                    source={require('../assets/logos.png')} // Change this to your image path
                     resizeMode="contain"
                 />
                 <Text style={styles.pageTitle}>Settings</Text>
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     },
     logo: {
         position: 'absolute',
-        width: 30,
+        width: 100,
         height: 50,
         resizeMode: 'contain',
         opacity : 0.8,

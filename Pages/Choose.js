@@ -13,7 +13,7 @@ export default function SerialNumberPage({ navigation }) {
         fetch('https://soniciot.com/api/Serial_List')
             .then((response) => response.json())
             .then((data) => {
-                const filteredData = data.filter((item) => item.category === 'adnoc');
+                const filteredData = data.filter((item) => item.category === 'general');
 
                 // Sort the filtered data by name in ascending order
                 const sortedData = filteredData.sort((a, b) => a.name.localeCompare(b.name));
@@ -53,14 +53,14 @@ export default function SerialNumberPage({ navigation }) {
 
     return (
         <ImageBackground
-            source={require("../assets/adnoc-background.png")} // Change this to your image path
+            source={require("../assets/BG.png")} // Change this to your image path
             style={styles.background}
             resizeMode="cover"
         >
             <View style={styles.first}>                        
                 <Image 
                     style={styles.logo} 
-                    source={require('../assets/adnoclogo.png')} // Change this to your image path
+                    source={require('../assets/logos.png')} // Change this to your image path
                     resizeMode="contain"
                 />
                 <Menu style={styles.settings} name="menu" size={40} color="rgba(255, 255, 255, 0.8)" onPress={() => navigation.navigate('Changefield')}/>
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
     },
     logo: {
-        width: 40,
+        width: 100,
         height: 60,
         resizeMode: 'contain',
         opacity : 0.8,

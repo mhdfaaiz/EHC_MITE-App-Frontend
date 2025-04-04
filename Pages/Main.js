@@ -357,7 +357,7 @@ const IndicatorApp = ({ route, navigation }) => {
                 
                     <Image 
                     style={styles.logo} 
-                    source={require('../assets/adnoclogo.png')} // Change this to your image path
+                    source={require('../assets/logos.png')} // Change this to your image path
                     resizeMode="contain"
                     />
                     <Icon style={styles.settings} name="settings-outline" size={30} color="gray" onPress={handleNextPage} />
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     logo: {
-        width: 30,
+        width: 100,
         height: 50,
         resizeMode: 'contain',
         opacity : 0.8,

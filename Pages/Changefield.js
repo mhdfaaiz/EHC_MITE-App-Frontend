@@ -12,7 +12,7 @@ export default function ChangePage() {
             .then((response) => response.json())
             .then((data) => {
                 const sortedData = data
-                    .filter((item) => item.category === 'adnoc')
+                    .filter((item) => item.category === 'general')
                     .map((item) => ({ id: item.id, name: item.name })) // Preserve IDs
                     .sort((a, b) => a.name.localeCompare(b.name));
     
@@ -50,14 +50,14 @@ export default function ChangePage() {
 
     return (
          <ImageBackground
-            source={require("../assets/adnoc-background.png")} // Change this to your image path
+            source={require("../assets/BG.png")} // Change this to your image path
             style={styles.background}
             resizeMode="cover"
             >
             <View style={styles.container}>
                 <Image
                     style={styles.logo}
-                    source={require('../assets/adnoclogo.png')} // Change this to your image path
+                    source={require('../assets/logos.png')} // Change this to your image path
                     resizeMode="contain"
                 />
 
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     },
     logo: {
         position: 'absolute',
-        width: 30,
+        width: 100,
         height: 50,
         resizeMode: 'contain',
         left: 10,

@@ -4,7 +4,7 @@ import SignalDisplay from '../Components/signalDisplay';
 export default function App({ navigation }) {
     return (
         <ImageBackground
-            source={require("../assets/adnoc-background.png")}
+            source={require("../assets/BG.png")}
             style={styles.background}
             resizeMode="cover"
         >
@@ -14,12 +14,12 @@ export default function App({ navigation }) {
                     <View style={[styles.logoContainer, styles.elevation]}>
                         <Image 
                             style={styles.logo} 
-                            source={require('../assets/adnoc.png')} 
+                            source={require('../assets/logos.png')} 
                             resizeMode="contain"
                         /> 
                     </View>
                     {/* Welcome Text */}
-                    <Text style={styles.welcomeText}>ENERGY FOR LIFE</Text>
+                    <Text style={styles.welcomeText}></Text>
                     
                 </View>
                 {/* Navigation Button for New Page */}
@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         height: '100%',
+        
     },
     safeArea: {
         flex: 1,
@@ -51,12 +52,12 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     logoContainer: {
-        width: '35%',
-        height: '36%',
+        width: '65%',
+        height: '15%',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(255, 255, 255, 0.4)',
-        borderRadius: 2,
+        borderRadius: 5,
         padding: 15,
         marginBottom: 30,
         marginTop: 60,
