@@ -8,7 +8,7 @@ export default function ChangePage() {
     const navigation = useNavigation();
 
     useEffect(() => {
-        fetch('https://soniciot.com/api/Serial_List')
+        fetch('https://transgaz.soniciot.com/api/Serial_List')
             .then((response) => response.json())
             .then((data) => {
                 const sortedData = data
@@ -33,7 +33,7 @@ export default function ChangePage() {
     const handleSubmit = async () => {
         try {
             const updateNamesPromises = serialNames.map(({ id, name }) =>
-                fetch(`https://soniciot.com/api/Serial_List/${id}`, {
+                fetch(`https://transgaz.soniciot.com/api/Serial_List/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name }),

@@ -2,37 +2,57 @@ import React, { useEffect, useState } from "react";
 import { View, Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 
-export default function Graph({ dataPoints = [] }) {
+export default function Graph({ dataA = [], dataB = [], dataC = [], dataD = [] }) {
     const [labels, setLabels] = useState([]);
 
     useEffect(() => {
-        // Generate time labels with date for the first label and time for the rest
         const getTimeLabels = () => {
             const now = new Date();
-            return Array.from({ length: 6 }, (_, i) => {
-                const time = new Date(now.getTime() - (5 - i) * 60000); // 1-minute interval
-                const day = time.getDate().toString().padStart(2, '0');
-                const month = (time.getMonth() + 1).toString().padStart(2, '0');
-                const hours = time.getHours().toString().padStart(2, '0');
-                const minutes = time.getMinutes().toString().padStart(2, '0');
-
-                // Add date to the first label and time to the rest
-                return i === 0 ? `${day}/${month} ->  ${hours}:${minutes}     ` : `${hours}:${minutes}`;
+            const maxLength = Math.max(dataA.length, dataB.length, dataC.length, dataD.length);
+            return Array.from({ length: maxLength }, (_, i) => {
+                const time = new Date(now.getTime() - (maxLength - 1 - i) * 1000);
+                const hours = time.getHours().toString().padStart(2, "0");
+                const minutes = time.getMinutes().toString().padStart(2, "0");
+                const seconds = time.getSeconds().toString().padStart(2, "0");
+                return `${hours}:${minutes}:${seconds}`;
             });
         };
 
         setLabels(getTimeLabels());
-    }, [dataPoints]); // Update labels when data changes
+    }, [dataA, dataB, dataC, dataD]);
 
-    // Map voltage values to percentage values
-    const percentageDataPoints = dataPoints.map(point => (point/890) *100);
+    const safeMap = (arr) =>
+        arr.map((point) => {
+            const val = Number(point);
+            const percent = (val / 890) * 100; // Assuming 890 is the max value
+            return isFinite(percent) ? percent : 0;
+        });
+
+    const percentageDataA = safeMap(dataA);
+    const percentageDataB = safeMap(dataB);
+    const percentageDataC = safeMap(dataC);
+    const percentageDataD = safeMap(dataD);
+
+    if (
+        percentageDataA.length === 0 &&
+        percentageDataB.length === 0 &&
+        percentageDataC.length === 0 &&
+        percentageDataD.length === 0
+    ) {
+        return null; // Or show a loading indicator
+    }
 
     return (
         <View>
             <LineChart
                 data={{
                     labels: labels,
-                    datasets: [{ data: percentageDataPoints.length ? percentageDataPoints : Array(6).fill(0) }],
+                    datasets: [
+                        { data: percentageDataA, color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, strokeWidth: 2 }, // A
+                        { data: percentageDataB, color: (opacity = 1) => `rgba(244, 67, 54, ${opacity})`, strokeWidth: 2 }, // B
+                        { data: percentageDataC, color: (opacity = 1) => `rgba(34, 193, 195, ${opacity})`, strokeWidth: 2 }, // C
+                        { data: percentageDataD, color: (opacity = 1) => `rgba(253, 187, 45, ${opacity})`, strokeWidth: 2 }, // D
+                    ],
                 }}
                 width={Dimensions.get("window").width - 40}
                 height={240}

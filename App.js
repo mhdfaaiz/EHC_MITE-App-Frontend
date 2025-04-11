@@ -10,7 +10,6 @@ import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
 import Gaslevel from './Pages/Gaslevel';
 import Graph from './Components/Graph';
-import GasTank from './Components/Gastank';
 import Changefield from './Pages/Changefield';
 import SignalDisplay from './Components/signalDisplay';
 
@@ -79,7 +78,6 @@ export default function App() {
         <Stack.Screen name="Notification" component={Notification} />
         <Stack.Screen name="GasLevel" component={Gaslevel} />
         <Stack.Screen name="Graph" component={Graph} />
-        <Stack.Screen name="GasTank" component={GasTank} />
         <Stack.Screen name="Changefield" component={Changefield} />
         <Stack.Screen name="signal" component={SignalDisplay} />
       </Stack.Navigator>

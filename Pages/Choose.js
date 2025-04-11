@@ -10,10 +10,10 @@ export default function SerialNumberPage({ navigation }) {
     const [items, setItems] = useState([]);
 
     const fetchSerialList = () => {
-        fetch('https://soniciot.com/api/Serial_List')
+        fetch('https://transgaz.soniciot.com/api/serial_list')
             .then((response) => response.json())
             .then((data) => {
-                const filteredData = data.filter((item) => item.category === 'general');
+                const filteredData = data.filter((item) => item.category === 'transgaz');
 
                 // Sort the filtered data by name in ascending order
                 const sortedData = filteredData.sort((a, b) => a.name.localeCompare(b.name));

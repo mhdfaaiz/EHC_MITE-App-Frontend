@@ -34,7 +34,7 @@ const IndicatorApp = ({ route, navigation }) => {
     };
     // Socket Initialization
     useEffect(() => {
-        const socket = io("https://soniciot.com");
+        const socket = io("https://transgaz.soniciot.com");
 
         socket.on('connect', () => {
             console.log('WebSocket connected');
@@ -85,7 +85,7 @@ const IndicatorApp = ({ route, navigation }) => {
                     [data.data]: newColor,
                 }));
                 // Save the updated color to the backend
-                fetch('https://soniciot.com/api/indicatoricons/update', {
+                fetch('https://transgaz.soniciot.com/api/indicatoricons/update', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -115,7 +115,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const initializeIndicators = async () => {
             try {
-                await fetch('https://soniciot.com/api/initialize', {
+                await fetch('https://transgaz.soniciot.com/api/initialize', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -137,7 +137,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const fetchIndicators = async () => {
             try {
-                const response = await fetch(`https://soniciot.com/api/indicators/${serialNumber}`);
+                const response = await fetch(`https://transgaz.soniciot.com/api/indicators/${serialNumber}`);
                 const data = await response.json();
                 console.log(data)
                 setIndicatorname(data); // Set the fetched indicator names to state
@@ -154,7 +154,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const fetchIndicatorColors = async () => {
             try {
-                const response = await fetch(`https://soniciot.com/api/indicatoricons/${serialNumber}`);
+                const response = await fetch(`https://transgaz.soniciot.com/api/indicatoricons/${serialNumber}`);
                 const data = await response.json();
 
                 // Map the colors from the response
@@ -178,7 +178,7 @@ const IndicatorApp = ({ route, navigation }) => {
 
     const fetchLogs = async () => {
         try {
-            const response = await fetch("https://soniciot.com/api/logs"); // Replace with your API URL
+            const response = await fetch("https://transgaz.soniciot.com/api/logs"); // Replace with your API URL
 
             if (!response.ok) {
                 throw new Error("Failed to fetch logs");
@@ -223,7 +223,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('https://soniciot.com/api/mqtt-data');
+                const response = await fetch('https://transgaz.soniciot.com/api/mqtt-data');
                 await response.json();
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -238,7 +238,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const fetchReverseIndicator = async () => {
             try {
-                const response = await fetch(`https://soniciot.com/api/reverse-indicator/${serialNumber}`);
+                const response = await fetch(`https://transgaz.soniciot.com/api/reverse-indicator/${serialNumber}`);
                 const data = await response.json();
                 setIsReversed(data.isReversed);
             } catch (error) {
