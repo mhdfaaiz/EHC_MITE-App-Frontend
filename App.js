@@ -9,9 +9,11 @@ import Notification from './Components/Notification';
 import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
 import Gaslevel from './Pages/Gaslevel';
-import Graph from './Components/Graph';
+import Graph from './Components/Graph1';
 import Changefield from './Pages/Changefield';
 import SignalDisplay from './Components/signalDisplay';
+import GraphHistory from './Components/GraphHistory';
+import Table from './Components/Table';
 
 export default function App() {
   useEffect(() => {
@@ -80,6 +82,8 @@ export default function App() {
         <Stack.Screen name="Graph" component={Graph} />
         <Stack.Screen name="Changefield" component={Changefield} />
         <Stack.Screen name="signal" component={SignalDisplay} />
+        <Stack.Screen name="GraphHistory" component={GraphHistory} />
+        <Stack.Screen name="Table" component={Table} />
       </Stack.Navigator>
     </NavigationContainer>
   );
