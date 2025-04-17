@@ -22,6 +22,14 @@ const IndicatorApp = ({ route, navigation }) => {
     const [active, setActive] = useState(false);
     const [activeButton, setActiveButton] = useState('live')
 
+
+    const [thresholds, setThresholds] = useState({
+        DI1: 2000, // Example threshold for DI1
+        DI2: 2500, // Example threshold for DI2
+        DI3: 3500, // Example threshold for DI3
+        DI4: 4000, // Example threshold for DI4
+    });
+
     const handlePressIn = (buttonName) => {
         setActiveButton(buttonName);
     };
@@ -48,66 +56,93 @@ const IndicatorApp = ({ route, navigation }) => {
             console.log('WebSocket disconnected');
         });
 
-        socket.on('status', (data) => {
-            console.log("Received updated client status:", data);
-            if (serialNumber in data) {
-                status = data[serialNumber]
-                const color = status === "down" ? '#ff2323' : '#16b800';
-                setConnectionState({ color, serialNo: serialNumber });
-            }
-        });
-
-        socket.on('alarm', (data) => {
-            if (typeof data === 'string') {
-                try {
-                    data = JSON.parse(data);
-                    console.log(data);
-
-                } catch (e) {
-                    console.error('Error parsing data:', e);
-                    return;
+        socket.on("bivicomdata", (data) => {
+            try {
+                data = JSON.parse(data);
+        
+                if (data.serialNumber === serialNumber) {
+                    const valueA = data.A;
+                    const valueB = data.B;
+                    const valueC = data.C;
+                    const valueD = data.D;
+        
+                    console.log(valueA, valueB, valueC, valueD);
+        
+                    const updatedColors = { ...indicatorColors };
+                    const updatedTableData = [...tableData]; // Clone the current live table data
+        
+                    // Check each value against the thresholds
+                    if (valueA > thresholds.DI1) {
+                        updatedColors['DI1'] = '#b10303'; // Red
+                        updatedTableData.unshift({
+                            TIMESTAMP: new Date().toLocaleString(),
+                            INPUT: 'DI1',
+                            MESSAGE: valueA,
+                        });
+                    } else {
+                        updatedColors['DI1'] = '#16b800'; // Green
+                    }
+        
+                    if (valueB > thresholds.DI2) {
+                        updatedColors['DI2'] = '#b10303'; // Red
+                        updatedTableData.unshift({
+                            TIMESTAMP: new Date().toLocaleString(),
+                            INPUT: 'DI2',
+                            MESSAGE: valueB,
+                        });
+                    } else {
+                        updatedColors['DI2'] = '#16b800'; // Green
+                    }
+        
+                    if (valueC > thresholds.DI3) {
+                        updatedColors['DI3'] = '#b10303'; // Red
+                        updatedTableData.unshift({
+                            TIMESTAMP: new Date().toLocaleString(),
+                            INPUT: 'DI3',
+                            MESSAGE: valueC,
+                        });
+                    } else {
+                        updatedColors['DI3'] = '#16b800'; // Green
+                    }
+        
+                    if (valueD > thresholds.DI4) {
+                        updatedColors['DI4'] = '#b10303'; // Red
+                        updatedTableData.unshift({
+                            TIMESTAMP: new Date().toLocaleString(),
+                            INPUT: 'DI4',
+                            MESSAGE: valueD,
+                        });
+                    } else {
+                        updatedColors['DI4'] = '#16b800'; // Green
+                    }
+        
+                    // Update indicator colors and table data state
+                    setIndicatorColors(updatedColors);
+                    setTableData(updatedTableData);
+        
+                    // Save updated colors to the backend
+                    ['DI1', 'DI2', 'DI3', 'DI4'].forEach((indicator, index) => {
+                        const newColor = updatedColors[indicator];
+                        fetch('https://transgaz.soniciot.com/api/indicatoricons/update', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                serial_number: serialNumber,
+                                indicator,
+                                color: newColor,
+                            }),
+                        }).catch(error => console.error(`Error saving color for ${indicator}:`, error));
+                    });
                 }
-            }
-            if (data.serialno === serialNumber) {
-                const formattedData = {
-                    TIMESTAMP: data.timestamp || 'N/A',
-                    INPUT: data.data || 'N/A',
-                    VALUE: data.status || 'N/A',
-                };
-
-                setTableData((prevData) => [...prevData, formattedData]);
-                setTimeout(() => {
-                    flatListRef.current?.scrollToEnd({ animated: true });
-                }, 0);
-                const newColor = data.status === '0' ? '#16b800' : '#b10303';
-                setIndicatorColors((prevColors) => ({
-                    ...prevColors,
-                    [data.data]: newColor,
-                }));
-                // Save the updated color to the backend
-                fetch('https://transgaz.soniciot.com/api/indicatoricons/update', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        serial_number: serialNumber,
-                        indicator: data.data,
-                        color: newColor,
-                    }),
-                }).catch(error => console.error('Error saving indicator color:', error));
+            } catch (err) {
+                console.error("Socket data parsing error:", err);
             }
         });
-        socket.on('voltage', (data) => {
-            console.log("Received updated client status:", data);
-            setActive(true);
-
-        });
-
-
         return () => {
             socket.disconnect();
             console.log('WebSocket connection closed');
         };
-    }, []);
+    }, [serialNumber, thresholds, indicatorColors]);
 
 
 
@@ -258,7 +293,6 @@ const IndicatorApp = ({ route, navigation }) => {
             return color;
         },
         [indicatorColors, isReversed]
-
     );
 
     const renderRow = useCallback(({ item }) => {
@@ -267,12 +301,12 @@ const IndicatorApp = ({ route, navigation }) => {
         const indicatorDisplayName = indicatorname[indicatorIndex]?.name || item.INPUT; // Use the indicator name or fallback to INPUT
 
         // Determine the alarm status
-        const alarmStatus = item.VALUE === '1' ? 'Alarm ON' : 'Alarm OFF';
+        //const alarmStatus = item.VALUE === '1' ? 'Alarm ON' : 'Alarm OFF';
         return (
             <View style={styles.row}>
                 <Text style={[styles.cell, styles.dateCell]}>{item.TIMESTAMP}</Text>
                 <Text style={[styles.cell, styles.dataCell]}>{indicatorDisplayName}</Text>
-                <Text style={[styles.cell, styles.statusCell]}>{alarmStatus}</Text>
+                <Text style={[styles.cell, styles.statusCell]}>{item.MESSAGE}</Text>
             </View>
         );
     }, [indicatorname]);
