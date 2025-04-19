@@ -24,10 +24,10 @@ const IndicatorApp = ({ route, navigation }) => {
 
 
     const [thresholds, setThresholds] = useState({
-        DI1: 2000, // Example threshold for DI1
-        DI2: 2500, // Example threshold for DI2
-        DI3: 3500, // Example threshold for DI3
-        DI4: 4000, // Example threshold for DI4
+        DI1: 100, // Example threshold for DI1
+        DI2: 100, // Example threshold for DI2
+        DI3: 1, // Example threshold for DI3
+        DI4: 5000, // Example threshold for DI4
     });
 
     const handlePressIn = (buttonName) => {
@@ -547,8 +547,8 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     logo: {
-        width: 100,
-        height: 50,
+        width: 150,
+        height: 70,
         resizeMode: 'contain',
         opacity : 0.8,
         marginBottom: 20

@@ -12,7 +12,7 @@ export default function ChangePage() {
             .then((response) => response.json())
             .then((data) => {
                 const sortedData = data
-                    .filter((item) => item.category === 'general')
+                    .filter((item) => item.category === 'transgaz')
                     .map((item) => ({ id: item.id, name: item.name })) // Preserve IDs
                     .sort((a, b) => a.name.localeCompare(b.name));
     
