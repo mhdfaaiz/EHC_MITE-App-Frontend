@@ -141,17 +141,17 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
     },
     logo: {
-        width: 100,
-        height: 60,
+        width: 150,
+        height: 70,
         resizeMode: 'contain',
         opacity : 0.8,
         margin : 10
     },
     title: {
-        fontSize: 28,
+        fontSize: 30,
         fontWeight: 'bold',
         color: '#fff',
-        marginBottom: 10,
+        marginTop: 100,
     },
     subText: {
         fontSize: 18,

@@ -12,7 +12,6 @@ import Gaslevel from './Pages/Gaslevel';
 import Graph from './Components/Graph1';
 import Changefield from './Pages/Changefield';
 import SignalDisplay from './Components/signalDisplay';
-import GraphHistory from './Components/GraphHistory';
 import Table from './Components/Table';
 
 export default function App() {
@@ -33,7 +32,7 @@ export default function App() {
         console.log('🔑 FCM Token:', token);
   
         // Send the token to the backend
-        await fetch('https://soniciot.com/api/save-token', {
+        await fetch('https://transgaz.soniciot.com/api/save-token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -82,7 +81,6 @@ export default function App() {
         <Stack.Screen name="Graph" component={Graph} />
         <Stack.Screen name="Changefield" component={Changefield} />
         <Stack.Screen name="signal" component={SignalDisplay} />
-        <Stack.Screen name="GraphHistory" component={GraphHistory} />
         <Stack.Screen name="Table" component={Table} />
       </Stack.Navigator>
     </NavigationContainer>

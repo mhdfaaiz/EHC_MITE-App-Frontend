@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
 const { io } = require("socket.io-client");
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,} from "react";
 import Graph1 from "../Components/Graph1";
 import Graph2 from "../Components/Graph2";
 import TableComponent from "../Components/Table";
+import SignalDisplay from "../Components/signalDisplay";
 
 export default function App({ route, navigation }) {
     const [dataA, setDataA] = useState([]);
@@ -52,13 +53,18 @@ export default function App({ route, navigation }) {
         return () => socket.disconnect();
     }, []);
 
-    const handleNavigateToHistory = () => {
-        navigation.navigate("GraphHistory", { serialNumber });
-    };
-
     return (
         <View style={styles.container}>
-            <Text style={styles.welcomeText}>GAS SENSOR</Text>
+            <Image
+                style={styles.logo}
+                source={require('../assets/logos.png')} // Change this to your image path
+                resizeMode="contain"
+           />
+            <View style={styles.serialbox}>
+                <Text style={styles.serialno}>{serialNumber}</Text>
+            </View>
+
+            <Text style={styles.welcomeText}>GAS SENSOR READINGS</Text>
 
             {/* Tabs */}
             <View style={styles.tabContainer}>
@@ -66,19 +72,19 @@ export default function App({ route, navigation }) {
                     style={[styles.tabButton, activeTab === 1 && styles.activeTab]}
                     onPress={() => setActiveTab(1)}
                 >
-                    <Text style={[styles.tabText, activeTab === 1 && styles.activeTabText]}>Graph 1</Text>
+                    <Text style={[styles.tabText, activeTab === 1 && styles.activeTabText]}>LASER</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.tabButton, activeTab === 2 && styles.activeTab]}
                     onPress={() => setActiveTab(2)}
                 >
-                    <Text style={[styles.tabText, activeTab === 2 && styles.activeTabText]}>Graph 2</Text>
+                    <Text style={[styles.tabText, activeTab === 2 && styles.activeTabText]}>INFRARED</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.tabButton, activeTab === 3 && styles.activeTab]}
                     onPress={() => setActiveTab(3)}
                 >
-                    <Text style={[styles.tabText, activeTab === 3 && styles.activeTabText]}>Table</Text>
+                    <Text style={[styles.tabText, activeTab === 3 && styles.activeTabText]}>ACOUSTIC</Text>
                 </TouchableOpacity>
             </View>
 
@@ -89,9 +95,6 @@ export default function App({ route, navigation }) {
                 {activeTab === 3 && <TableComponent data={{dataD }} />}
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleNavigateToHistory}>
-                <Text style={styles.buttonText}>See Reading History</Text>
-            </TouchableOpacity>
             <Text style={styles.subTextdown}>Powered by SONIC</Text>
         </View>
     );
@@ -105,10 +108,46 @@ const styles = StyleSheet.create({
         paddingTop: 50,
         padding: 20,
     },
+    logo: {
+        position: 'absolute',
+        width: 150,
+        height: 70,
+        resizeMode: 'contain',
+        left: 10,
+        top: 10,
+    },
+    serialbox: {
+        position: 'absolute',
+        width: 150, // Adjust width as per your design
+        height: 40, // Adjust height for a small display
+        backgroundColor: '#000', // Display background color
+        borderRadius: 10, // Rounded corners
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2, // Border width for a metallic finish
+        borderColor: '#888', // Border color
+        shadowColor: '#000', // Shadow for depth
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.7,
+        shadowRadius: 10,
+        elevation: 5, // Elevation for Android
+        marginTop: 20, // Margin to separate from the logo
+        right: 10, // Align with the logo
+        top: 10, // Adjust position as needed
+    },
+    serialno: {
+        fontSize: 15, // Font size for the serial number
+        fontWeight: 'bold',
+        color: '#fff', // White text color
+        textShadowColor: '#16b800', // Green shadow for a glowing effect
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 10, // Create a glowing effect
+    },
     welcomeText: {
-        fontSize: 20,
+        fontSize: 25,
         fontWeight: "900",
         color: "rgba(255, 255, 255, 0.4)",
+        marginTop: 60,
         marginBottom: 20,
         textAlign: "center",
     },

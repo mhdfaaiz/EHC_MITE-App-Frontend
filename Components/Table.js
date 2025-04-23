@@ -16,7 +16,7 @@ export default function TableComponent({ data }) {
             {/* Table Header */}
             <View style={styles.tableHeader}>
                 <Text style={styles.headerText}>Datetime</Text>
-                <Text style={styles.headerText}>DataD</Text>
+                <Text style={styles.headerText}>Readings</Text>
             </View>
 
             {/* Table Data */}
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#282828",
         padding: 10,
         borderRadius: 8,
-        maxHeight: 300, // Reduced height for the table
+        maxHeight: 500, // Reduced height for the table
     },
     tableHeader: {
         flexDirection: "row",

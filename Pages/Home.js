@@ -48,19 +48,18 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'top',
         padding: 20,
     },
     logoContainer: {
-        width: '65%',
+        width: '100%',
         height: '15%',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.4)',
+        backgroundColor: 'rgba(255, 255, 255, 0.58)',
         borderRadius: 5,
+        marginTop: 25,
         padding: 15,
-        marginBottom: 30,
-        marginTop: 60,
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 15,
@@ -70,7 +69,7 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
     },
     logo: {
-        width: 200,
+        width: 250,
         height: 300,
         resizeMode: 'contain',
     },
@@ -83,7 +82,7 @@ const styles = StyleSheet.create({
     },
     subText: {
         fontSize: 16,
-        color: 'rgba(255, 255, 255, 0.4)',
+        color: 'rgba(255, 255, 255, 0.51)',
         textAlign: 'center',
         marginBottom: 30
     },

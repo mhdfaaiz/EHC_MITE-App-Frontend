@@ -1,11 +1,35 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Switch, ScrollView ,Image} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Switch, ScrollView, Image } from 'react-native';
 
 export default function SettingsPage({ route, navigation }) {
     const { serialNumber, indicatorNames, reverseState, onUpdate } = route.params;
     const [indicatorname, setIndicatorname] = useState(indicatorNames);
     const [isReversed, setIsReversed] = useState(reverseState);
-    const [isEditing, setIsEditing] = useState(false);
+    const [thresholds, setThresholds] = useState({}); // State for thresholds
+    const [isEditingNames, setIsEditingNames] = useState(false);
+    const [isEditingThresholds, setIsEditingThresholds] = useState(false); // Separate edit mode for thresholds
+
+    useEffect(() => {
+        // Fetch thresholds from the backend when the settings page loads
+        const fetchThresholds = async () => {
+            try {
+                const response = await fetch(`https://transgaz.soniciot.com/api/thresholds/${serialNumber}`);
+                const data = await response.json();
+                setThresholds(data); // Initialize thresholds from the backend
+            } catch (error) {
+                console.error('Error fetching thresholds:', error);
+            }
+        };
+
+        fetchThresholds();
+    }, [serialNumber]);
+
+    const handleThresholdChange = (key, value) => {
+        setThresholds((prev) => ({
+            ...prev,
+            [key]: parseFloat(value), // Ensure thresholds are stored as numbers
+        }));
+    };
 
     const handleNameChange = (id, newName) => {
         setIndicatorname((prevNames) =>
@@ -32,13 +56,21 @@ export default function SettingsPage({ route, navigation }) {
                     body: JSON.stringify({ isReversed }),
                 }
             );
-            const reverseData = await reverseResponse.json();
-            if (reverseData.success) {
-                console.log('Reverse indicator updated successfully');
-            }
+            await reverseResponse.json();
+
+            // Save thresholds to the backend using DI1, DI2, etc.
+            await fetch(`https://transgaz.soniciot.com/api/thresholds/${serialNumber}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(thresholds),
+            });
 
             if (onUpdate) {
-                onUpdate({ updatedIndicatornames: indicatorname, updatedReversestate: isReversed });
+                onUpdate({
+                    updatedIndicatornames: indicatorname,
+                    updatedReversestate: isReversed,
+                    updatedThresholds: thresholds, // Pass thresholds back to IndicatorApp
+                });
             }
             navigation.goBack();
         } catch (error) {
@@ -49,22 +81,20 @@ export default function SettingsPage({ route, navigation }) {
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.container}>
-                <Image 
-                    style={styles.logo} 
-                    source={require('../assets/logos.png')} // Change this to your image path
+                <Image
+                    style={styles.logo}
+                    source={require('../assets/logos.png')}
                     resizeMode="contain"
                 />
                 <Text style={styles.pageTitle}>Settings</Text>
 
+                {/* Indicator Names Section */}
                 <View style={styles.card}>
-                    {/* Section Title */}
-                    <Text style={styles.sectionTitle}>Change Indicator Names</Text>
-
-                    {/* Indicator Name List */}
+                    <Text style={styles.sectionTitle}>Indicator Names</Text>
                     <View style={styles.indicatorList}>
-                        {indicatorname.map(({ id, name }) => (
+                        {indicatorname.map(({ id, name }, index) => (
                             <View key={id} style={styles.indicatorWrapper}>
-                                {isEditing ? (
+                                {isEditingNames ? (
                                     <TextInput
                                         style={styles.textInput}
                                         value={name}
@@ -76,20 +106,63 @@ export default function SettingsPage({ route, navigation }) {
                             </View>
                         ))}
                     </View>
-
-                    {/* Edit/Save Button */}
                     <View style={styles.buttonRow}>
-                        {!isEditing ? (
+                        {!isEditingNames ? (
                             <TouchableOpacity
                                 style={styles.actionButton}
-                                onPress={() => setIsEditing(true)}
+                                onPress={() => setIsEditingNames(true)}
                             >
                                 <Text style={styles.buttonText}>Edit</Text>
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity
                                 style={styles.actionButton}
-                                onPress={() => setIsEditing(false)}
+                                onPress={() => setIsEditingNames(false)}
+                            >
+                                <Text style={styles.buttonText}>Save</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </View>
+
+                {/* Thresholds Section */}
+                <View style={styles.card}>
+                    <Text style={styles.sectionTitle}>Indicator Thresholds</Text>
+                    <View style={styles.indicatorList}>
+                        {indicatorname.map(({ id, name }, index) => {
+                            const diKey = `DI${index + 1}`; // Use DI1, DI2, etc.
+                            return (
+                                <View key={id} style={styles.indicatorWrapper}>
+                                    <Text style={styles.indicatorName}>{name}</Text>
+                                    {isEditingThresholds ? (
+                                        <TextInput
+                                            style={styles.textInput}
+                                            keyboardType="numeric"
+                                            placeholder="Threshold"
+                                            value={thresholds[diKey]?.toString() || ''}
+                                            onChangeText={(value) => handleThresholdChange(diKey, value)}
+                                        />
+                                    ) : (
+                                        <Text style={styles.thresholdValue}>
+                                            Threshold: {thresholds[diKey] || 'Not Set'}
+                                        </Text>
+                                    )}
+                                </View>
+                            );
+                        })}
+                    </View>
+                    <View style={styles.buttonRow}>
+                        {!isEditingThresholds ? (
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => setIsEditingThresholds(true)}
+                            >
+                                <Text style={styles.buttonText}>Edit</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => setIsEditingThresholds(false)}
                             >
                                 <Text style={styles.buttonText}>Save</Text>
                             </TouchableOpacity>
@@ -125,19 +198,19 @@ const styles = StyleSheet.create({
     },
     logo: {
         position: 'absolute',
-        width: 100,
-        height: 50,
+        width: 130,
+        height: 70,
         resizeMode: 'contain',
-        opacity : 0.8,
-        left : 10,
-        top : 10
+        opacity: 0.8,
+        left: 10,
+        top: 10,
     },
     subTextdown: {
         fontSize: 12,
         color: 'rgba(255, 255, 255, 0.4)',
         textAlign: 'center',
         marginBottom: 10,
-        marginTop: 10
+        marginTop: 10,
     },
     pageTitle: {
         fontSize: 36,
@@ -172,6 +245,7 @@ const styles = StyleSheet.create({
     indicatorWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
         marginBottom: 15,
         borderBottomWidth: 1,
         borderBottomColor: '#444',
@@ -183,7 +257,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     textInput: {
-        width: '80%',
+        width: '40%',
         backgroundColor: '#333',
         padding: 10,
         color: '#fff',
@@ -191,13 +265,17 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#888',
     },
+    thresholdValue: {
+        fontSize: 16,
+        color: '#bbb',
+    },
     buttonRow: {
         flexDirection: 'row',
         justifyContent: 'center',
         marginTop: 10,
     },
     actionButton: {
-        backgroundColor: '#3d3b3b', // Blue color
+        backgroundColor: '#3d3b3b', // Button background
         paddingVertical: 12,
         paddingHorizontal: 40,
         borderRadius: 30,
@@ -209,7 +287,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
     },
     submitButton: {
-        backgroundColor: '#3d3b3b', // Vibrant Orange color for action
+        backgroundColor: '#3d3b3b', // Submit button background
         paddingVertical: 15,
         paddingHorizontal: 50,
         borderRadius: 30,
@@ -235,4 +313,3 @@ const styles = StyleSheet.create({
         color: '#bbb',
     },
 });
-
