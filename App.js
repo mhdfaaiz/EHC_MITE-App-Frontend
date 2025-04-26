@@ -5,7 +5,6 @@ import Home from './Pages/Home';
 import Main from './Pages/Main';
 import Choose from './Pages/Choose';
 import Settings from './Pages/Settings';
-import Notification from './Components/Notification';
 import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
 import Gaslevel from './Pages/Gaslevel';
@@ -76,7 +75,6 @@ export default function App() {
         <Stack.Screen name="Alarms" component={Main} />
         <Stack.Screen name="Main" component={Choose} />
         <Stack.Screen name="Settings" component={Settings} />
-        <Stack.Screen name="Notification" component={Notification} />
         <Stack.Screen name="GasLevel" component={Gaslevel} />
         <Stack.Screen name="Graph" component={Graph} />
         <Stack.Screen name="Changefield" component={Changefield} />

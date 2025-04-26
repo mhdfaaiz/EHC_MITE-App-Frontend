@@ -7,7 +7,7 @@ const SignalDisplay = ({ serialNo }) => {
   const [isMatching, setIsMatching] = useState(false);
 
   useEffect(() => {
-    const socket = io('https://soniciot.com'); // Replace with your server address
+    const socket = io('https://transgaz.soniciot.com'); // Replace with your server address
 
     socket.on('signal', (message) => {
       try {

@@ -128,10 +128,10 @@ const styles = StyleSheet.create({
     },
     logo: {
         position: 'absolute',
-        width: 150,
-        height: 70,
+        width: 250,
+        height: 80,
         resizeMode: 'contain',
-        left: 10,
+        alignSelf: 'center',
         top: 10
     },
     subTextdown: {

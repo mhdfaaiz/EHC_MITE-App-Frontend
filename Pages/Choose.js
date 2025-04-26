@@ -42,7 +42,7 @@ export default function SerialNumberPage({ navigation }) {
             }
             navigation.navigate('Alarms', { serialNumber: selectedName });
         }},
-        { title: 'GAS TANK LEVEL', onPress: () => {
+        { title: 'GRAPH READINGS', onPress: () => {
             if (!selectedName) {
                 alert('Please select the field');
                 return;
@@ -58,16 +58,28 @@ export default function SerialNumberPage({ navigation }) {
             resizeMode="cover"
         >
             <View style={styles.first}>                        
-                <Image 
-                    style={styles.logo} 
-                    source={require('../assets/logos.png')} // Change this to your image path
-                    resizeMode="contain"
-                />
                 <Menu style={styles.settings} name="menu" size={40} color="rgba(255, 255, 255, 0.8)" onPress={() => navigation.navigate('Changefield')}/>
+            </View>
+            <View style={styles.container}>
+                {/* Logo Section */}
+                  <View style={[styles.logoContainer, styles.elevation]}>
+                      <Image 
+                          style={styles.logo} 
+                          source={require('../assets/logos.png')} 
+                          resizeMode="contain"
+                      /> 
+                    </View>
+                   <View style={[styles.borealpicContainer, styles.elevation]}>
+                       <Image 
+                           style={styles.borealpic} 
+                           source={require('../assets/borealpic.jpg')} 
+                           resizeMode="contain"
+                        /> 
+                  </View>                    
             </View>
 
             <View style={styles.container}>
-                <Text style={styles.title}>Select Your Device</Text>
+                <Text style={styles.title}>SELECT YOUR DEVICE</Text>
                 <Text style={styles.subText}>Choose from the list below to proceed</Text>
                 <Dropdown
                     data={items}
@@ -107,6 +119,37 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    logoContainer: {
+        width: '80%',
+        height: '25%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.58)',
+        borderRadius: 5,
+        marginTop: 25,
+        padding: 15,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 15,
+    },
+    borealpicContainer: {
+        width: '80%',
+        height: '75%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.58)',
+        borderRadius: 5,
+        marginTop: 25,
+        padding: 15,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 15,
+    },
     settings: {
         position: 'absolute',
         right: 10,
@@ -117,6 +160,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        marginBottom: 50,
     },
     container: {
         flex: 1,
@@ -141,22 +185,24 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
     },
     logo: {
-        width: 150,
-        height: 70,
+        width: 250,
+        height: 300,
         resizeMode: 'contain',
-        opacity : 0.8,
-        margin : 10
+    },
+    borealpic: {
+        width: '98%',
+        height: '98%',
+        opacity: 0.8,
     },
     title: {
-        fontSize: 30,
+        fontSize: 35,
         fontWeight: 'bold',
         color: '#fff',
-        marginTop: 100,
     },
     subText: {
         fontSize: 18,
         color: '#fff',
-        marginBottom: 30,
+        marginBottom: 10,
         textAlign: 'center',
     },
     dropdown: {

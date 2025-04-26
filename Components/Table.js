@@ -24,7 +24,7 @@ export default function TableComponent({ data }) {
                 {dataD.map((value, index) => (
                     <View key={index} style={styles.tableRow}>
                         <Text style={styles.rowText}>{timestamps[index]}</Text>
-                        <Text style={styles.rowText}>{value}</Text>
+                        <Text style={styles.rowText}>{value} mA</Text>
                     </View>
                 ))}
             </ScrollView>

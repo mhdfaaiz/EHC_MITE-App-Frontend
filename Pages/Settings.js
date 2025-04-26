@@ -27,7 +27,7 @@ export default function SettingsPage({ route, navigation }) {
     const handleThresholdChange = (key, value) => {
         setThresholds((prev) => ({
             ...prev,
-            [key]: parseFloat(value), // Ensure thresholds are stored as numbers
+            [key]: value === "" ? "" : parseFloat(value), // Keep empty string when cleared
         }));
     };
 
@@ -139,7 +139,7 @@ export default function SettingsPage({ route, navigation }) {
                                             style={styles.textInput}
                                             keyboardType="numeric"
                                             placeholder="Threshold"
-                                            value={thresholds[diKey]?.toString() || ''}
+                                            value={thresholds[diKey]?.toString() || ""}
                                             onChangeText={(value) => handleThresholdChange(diKey, value)}
                                         />
                                     ) : (

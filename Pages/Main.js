@@ -19,6 +19,7 @@ const IndicatorApp = ({ route, navigation }) => {
     const flatListRef = useRef(null);
     const serialNumber = route.params?.serialNumber;
     const [activeButton, setActiveButton] = useState('live')
+    const [isCleared, setIsCleared] = useState(false);
     const [thresholds, setThresholds] = useState({
         DI1: 100, 
         DI3: 1, 
@@ -35,21 +36,73 @@ const IndicatorApp = ({ route, navigation }) => {
         setCurrentView(buttonName);
         setActiveButton(buttonName); // Set the button as active when clicked
     };
+
+    const clearTableData = () => {
+        if (currentView === 'live') {
+            setTableData([]);
+            setIsCleared(true); // Mark as cleared for live data
+        } else if (currentView === 'alarms') {
+            setAlarmData([]);
+        }
+    };
+
+    // Add refs for thresholds and indicatorColors
+    const thresholdsRef = useRef(thresholds);
+    const indicatorColorsRef = useRef(indicatorColors);
+
+    // Update refs whenever these values change
     useEffect(() => {
-        const socket = io("https://transgaz.soniciot.com");
-        let lastMessageTimestamp = null; // Track the last message time
-        let connectionCheckInterval = null;
+        thresholdsRef.current = thresholds;
+    }, [thresholds]);
+
+    useEffect(() => {
+        indicatorColorsRef.current = indicatorColors;
+    }, [indicatorColors]);
+
+    //check device online using ping mechanism
+
+    useEffect(() => {
+        let pingInterval = null;
     
-        const checkConnectionState = () => {
-            const currentTime = Date.now();
-            if (lastMessageTimestamp && currentTime - lastMessageTimestamp > 30000) {
-                // If no message has been received for more than 30 seconds, mark as offline
+        const checkDeviceStatus = async () => {
+            try {
+                const response = await fetch(`https://transgaz.soniciot.com/api/ping/${serialNumber}`);
+                if (response.ok) {
+                    // If the ping is successful, mark the device as online
+                    setConnectionState({ color: '#16b800', serialNo: serialNumber });
+                } else {
+                    // If the ping fails, mark the device as offline
+                    setConnectionState({ color: '#ff2323', serialNo: serialNumber });
+                }
+            } catch (error) {
+                // Handle network or other errors
                 setConnectionState({ color: '#ff2323', serialNo: serialNumber });
-            } else {
-                // Else, mark as online
-                setConnectionState({ color: '#16b800', serialNo: serialNumber });
             }
         };
+    
+        // Start the periodic ping
+        pingInterval = setInterval(checkDeviceStatus, 15000); // Ping every 10 seconds
+    
+        // Perform an initial ping immediately
+        checkDeviceStatus();
+    
+        return () => {
+            // Clear the interval on component unmount
+            clearInterval(pingInterval);
+        };
+    }, [serialNumber]);
+
+    useEffect(() => {
+        const socket = io("https://transgaz.soniciot.com", {
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 2000,
+            timeout: 20000,
+        });
+    
+        let lastMessageTimestamp = null;
+        let connectionCheckInterval = null;
+
     
         socket.on('connect', () => {
             console.log('WebSocket connected');
@@ -61,87 +114,79 @@ const IndicatorApp = ({ route, navigation }) => {
     
         socket.on('disconnect', () => {
             console.log('WebSocket disconnected');
-            // Mark as offline immediately on disconnect
-            setConnectionState({ color: '#ff2323', serialNo: serialNumber });
+        });
+    
+        socket.on("reconnect_attempt", () => {
+            console.log('Attempting to reconnect...');
+        });
+    
+        socket.on("reconnect", () => {
+            console.log('Reconnected successfully');
+        });
+    
+        socket.on("reconnect_failed", () => {
+            console.error('Reconnection failed');
         });
     
         socket.on("bivicomdata", (data) => {
             try {
                 data = JSON.parse(data);
-        
+    
                 if (data.serialNumber === serialNumber) {
-                    // Update the last message timestamp
                     lastMessageTimestamp = Date.now();
-        
+    
                     const valueA = data.A;
                     const valueB = data.B;
                     const valueC = data.C;
                     const valueD = data.D;
-        
+    
                     console.log(valueA, valueB, valueC, valueD);
-        
+    
                     const timestamp = new Date().toLocaleString();
-                    setTableData((prevTableData) => [
-                        ...prevTableData,
+    
+                    const newData = [
                         { TIMESTAMP: timestamp, INPUT: 'DI1', MESSAGE: valueA },
                         { TIMESTAMP: timestamp, INPUT: 'DI2', MESSAGE: valueB },
                         { TIMESTAMP: timestamp, INPUT: 'DI3', MESSAGE: valueC },
                         { TIMESTAMP: timestamp, INPUT: 'DI4', MESSAGE: valueD },
-                    ]);
-        
+                    ];
+    
+                    setTableData((prevTableData) => [...prevTableData, ...newData]);
+    
                     const updatedColors = { ...indicatorColors };
-                    const newAlarmData = []; // Collect new alarms in this array
-        
-                    if (valueA > thresholds.DI1) {
-                        updatedColors['DI1'] = '#b10303'; // Red
-                        newAlarmData.push({
-                            TIMESTAMP: timestamp,
-                            INPUT: 'DI1',
-                            MESSAGE: valueA,
-                        });
+                    const newAlarmData = [];
+    
+                    if (valueA > thresholdsRef.current.DI1) {
+                        updatedColors['DI1'] = '#b10303';
+                        newAlarmData.push({ TIMESTAMP: timestamp, INPUT: 'DI1', MESSAGE: valueA });
                     } else {
-                        updatedColors['DI1'] = '#16b800'; // Green
+                        updatedColors['DI1'] = '#16b800';
                     }
-        
-                    if (valueB > thresholds.DI2) {
-                        updatedColors['DI2'] = '#b10303'; // Red
-                        newAlarmData.push({
-                            TIMESTAMP: timestamp,
-                            INPUT: 'DI2',
-                            MESSAGE: valueB,
-                        });
+    
+                    if (valueB > thresholdsRef.current.DI2) {
+                        updatedColors['DI2'] = '#b10303';
+                        newAlarmData.push({ TIMESTAMP: timestamp, INPUT: 'DI2', MESSAGE: valueB });
                     } else {
-                        updatedColors['DI2'] = '#16b800'; // Green
+                        updatedColors['DI2'] = '#16b800';
                     }
-        
-                    if (valueC > thresholds.DI3) {
-                        updatedColors['DI3'] = '#b10303'; // Red
-                        newAlarmData.push({
-                            TIMESTAMP: timestamp,
-                            INPUT: 'DI3',
-                            MESSAGE: valueC,
-                        });
+    
+                    if (valueC > thresholdsRef.current.DI3) {
+                        updatedColors['DI3'] = '#b10303';
+                        newAlarmData.push({ TIMESTAMP: timestamp, INPUT: 'DI3', MESSAGE: valueC });
                     } else {
-                        updatedColors['DI3'] = '#16b800'; // Green
+                        updatedColors['DI3'] = '#16b800';
                     }
-        
-                    if (valueD > thresholds.DI4) {
-                        updatedColors['DI4'] = '#b10303'; // Red
-                        newAlarmData.push({
-                            TIMESTAMP: timestamp,
-                            INPUT: 'DI4',
-                            MESSAGE: valueD,
-                        });
+    
+                    if (valueD > thresholdsRef.current.DI4) {
+                        updatedColors['DI4'] = '#b10303';
+                        newAlarmData.push({ TIMESTAMP: timestamp, INPUT: 'DI4', MESSAGE: valueD });
                     } else {
-                        updatedColors['DI4'] = '#16b800'; // Green
+                        updatedColors['DI4'] = '#16b800';
                     }
-        
-                    // Append new alarms to the existing alarmData
+    
                     setAlarmData((prevAlarmData) => [...prevAlarmData, ...newAlarmData]);
-        
-                    // Update indicator colors and table data state
                     setIndicatorColors(updatedColors);
-        
+
                     // Save updated colors to the backend
                     ['DI1', 'DI2', 'DI3', 'DI4'].forEach((indicator) => {
                         const newColor = updatedColors[indicator];
@@ -160,11 +205,15 @@ const IndicatorApp = ({ route, navigation }) => {
                 console.error("Socket data parsing error:", err);
             }
         });
-        // Check connection state periodically
-        connectionCheckInterval = setInterval(checkConnectionState, 5000);
+    
+        const interval = setInterval(() => {
+            socket.emit("ping");
+        }, 15000);
+    
     
         return () => {
-            clearInterval(connectionCheckInterval); // Clear the interval on cleanup
+            clearInterval(interval);
+            socket.disconnect();
         };
     }, [serialNumber, thresholds, indicatorColors]);
     
@@ -264,13 +313,19 @@ const IndicatorApp = ({ route, navigation }) => {
 
     const getIndicatorColor = useCallback(
         (index) => {
+            // If the device is offline, return gray for all indicators
+            if (connectionState.color !== '#16b800') {
+                return 'grey';
+            }
+    
+            // Otherwise, get the color from the indicatorColors state
             const color = indicatorColors[index] || 'grey';
             if (isReversed) {
                 return color === '#16b800' ? '#b10303' : color === '#b10303' ? '#16b800' : color;
             }
             return color;
         },
-        [indicatorColors, isReversed]
+        [indicatorColors, isReversed, connectionState.color]
     );
 
     const renderRow = useCallback(({ item }) => {
@@ -356,11 +411,13 @@ const IndicatorApp = ({ route, navigation }) => {
                     <Text style={[styles.statusText, { color: connectionState.color }]}>
                         {connectionState.color === '#16b800' ? 'ONLINE' : 'OFFLINE'}
                     </Text>
-                    <SignalDisplay serialNo={serialNumber} />
+                    {/* Render SignalDisplay only if the device is online */}
+                    {connectionState.color === '#16b800' && <SignalDisplay serialNo={serialNumber} />}
                 </View>
             </View>
 
             <View style={styles.indicatorContainer}>
+                {/* Row for the icons */}
                 <View style={styles.indicatorRow}>
                     {iconNames.map((name, index) => (
                         <View key={index} style={styles.indicatorWrapper}>
@@ -391,12 +448,30 @@ const IndicatorApp = ({ route, navigation }) => {
                         </View>
                     ))}
                 </View>
+
+                {/* Row for the indicator names */}
                 <View style={styles.indicatornameRow}>
                     {indicatorname.map((indicator) => (
                         <View key={indicator.id} style={styles.indicatorWrapper}>
                             <Text style={styles.label}>{indicator.name}</Text>
                         </View>
                     ))}
+                </View>
+
+                {/* Row for the labels (PPM, LEL%, mA) aligned with the icons */}
+                <View style={styles.indicatorLabelRow}>
+                    <View style={styles.indicatorWrapper}>
+                        <Text style={styles.label}>PPM</Text>
+                    </View>
+                    <View style={styles.indicatorWrapper}>
+                        <Text style={styles.label}>PPM</Text>
+                    </View>
+                    <View style={styles.indicatorWrapper}>
+                        <Text style={styles.label}>LEL%</Text>
+                    </View>
+                    <View style={styles.indicatorWrapper}>
+                        <Text style={styles.label}>mA</Text>
+                    </View>
                 </View>
             </View>
             <View style={styles.switchbuttons}>
@@ -417,14 +492,11 @@ const IndicatorApp = ({ route, navigation }) => {
                         <Text style={styles.logs}>Alarms</Text>
                     </TouchableOpacity>
                 </Animated.View>
-
-                {currentView === 'live' && (
                     <TouchableOpacity style={styles.clearbutton}
-                        onPress={() => setTableData([])}
+                        onPress={clearTableData}
                     >
                         <Text style={styles.cleartext}>Clear</Text>
                     </TouchableOpacity>
-                )}
             </View>
 
             <View style={boxStyle}>
@@ -496,7 +568,7 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     logo: {
-        width: 150,
+        width: 200,
         height: 70,
         resizeMode: 'contain',
         opacity : 0.8,
@@ -641,7 +713,11 @@ const styles = StyleSheet.create({
     },
     indicatornameRow: {
         flexDirection: 'row',
-        marginBottom: 20
+        marginBottom: 5,
+    },
+    indicatorLabelRow: {
+        flexDirection: 'row',
+        marginBottom: 20,
     },
     indicatorWrapper: {
         marginHorizontal: '3%',

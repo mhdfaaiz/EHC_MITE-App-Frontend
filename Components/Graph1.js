@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Dimensions, ScrollView } from "react-native";
+import { View, Text, Dimensions, ScrollView } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 
 export default function Graph({ dataA = [], dataB = []}) {
@@ -51,6 +51,18 @@ export default function Graph({ dataA = [], dataB = []}) {
     return (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View>
+                {/* Add the PPM label */}
+                <Text
+                    style={{
+                        left: '1%',
+                        fontSize: 16,
+                        color: "#fff",
+                        zIndex: 1, // Ensure it appears above the chart
+                    }}
+                >
+                    PPM
+                </Text>
+
                 <LineChart
                     data={{
                         labels: labels,
