@@ -7,7 +7,7 @@ const SignalDisplay = ({ serialNo }) => {
   const [isMatching, setIsMatching] = useState(false);
 
   useEffect(() => {
-    const socket = io('https://transgaz.soniciot.com'); // Replace with your server address
+    const socket = io('https://soniciot.com'); // Replace with your server address
 
     socket.on('signal', (message) => {
       try {
@@ -33,14 +33,11 @@ const SignalDisplay = ({ serialNo }) => {
     };
   }, [serialNo]); // Re-run effect if serialNo changes
 
-  if (!isMatching) {
-    return null; // Hide component if serial number does not match
-  }
 
   return (
     <View style={styles.serialbox}>
       <Text style={styles.serialno}>
-        Signal: {signal !== null ? `${signal}%` : 'Loading...'}
+        GSM Signal : {signal !== null ? `${signal}%` : ''}
       </Text>
     </View>
   );

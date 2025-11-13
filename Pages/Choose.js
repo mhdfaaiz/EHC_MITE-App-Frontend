@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, Image } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import Icon from 'react-native-vector-icons/Ionicons';
 import Menu from 'react-native-vector-icons/Entypo';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -10,10 +9,10 @@ export default function SerialNumberPage({ navigation }) {
     const [items, setItems] = useState([]);
 
     const fetchSerialList = () => {
-        fetch('https://transgaz.soniciot.com/api/serial_list')
+        fetch('https://soniciot.com/api/serial_list')
             .then((response) => response.json())
             .then((data) => {
-                const filteredData = data.filter((item) => item.category === 'transgaz');
+                const filteredData = data.filter((item) => item.category === 'ehc');
 
                 // Sort the filtered data by name in ascending order
                 const sortedData = filteredData.sort((a, b) => a.name.localeCompare(b.name));
@@ -42,18 +41,11 @@ export default function SerialNumberPage({ navigation }) {
             }
             navigation.navigate('Alarms', { serialNumber: selectedName });
         }},
-        { title: 'GRAPH READINGS', onPress: () => {
-            if (!selectedName) {
-                alert('Please select the field');
-                return;
-            }
-            navigation.navigate('GasLevel', { serialNumber: selectedName });
-        }},
     ];
 
     return (
         <ImageBackground
-            source={require("../assets/BG.png")} // Change this to your image path
+            source={require("../assets/ehchassantukbg.jpg")} // Change this to your image path
             style={styles.background}
             resizeMode="cover"
         >
@@ -61,25 +53,19 @@ export default function SerialNumberPage({ navigation }) {
                 <Menu style={styles.settings} name="menu" size={40} color="rgba(255, 255, 255, 0.8)" onPress={() => navigation.navigate('Changefield')}/>
             </View>
             <View style={styles.container}>
-                {/* Logo Section */}
-                  <View style={[styles.logoContainer, styles.elevation]}>
-                      <Image 
-                          style={styles.logo} 
-                          source={require('../assets/logos.png')} 
-                          resizeMode="contain"
-                      /> 
-                    </View>
-                   <View style={[styles.borealpicContainer, styles.elevation]}>
-                       <Image 
-                           style={styles.borealpic} 
-                           source={require('../assets/borealpic.jpg')} 
-                           resizeMode="contain"
-                        /> 
-                  </View>                    
-            </View>
+            {/* Logo Section */}
+                <Image 
+                    style={styles.logo1} 
+                    source={require('../assets/EHC-Black-trans.png')} 
+                /> 
+                <Image 
+                     style={styles.logo2} 
+                     source={require('../assets/mite.png')} 
+                />              
+             </View>
 
             <View style={styles.container}>
-                <Text style={styles.title}>SELECT YOUR DEVICE</Text>
+                <Text style={styles.title}>SELECT THE ZONE</Text>
                 <Text style={styles.subText}>Choose from the list below to proceed</Text>
                 <Dropdown
                     data={items}
@@ -184,8 +170,15 @@ const styles = StyleSheet.create({
         elevation: 50,
         shadowColor: '#000',
     },
-    logo: {
-        width: 250,
+        logo1: {
+        width: 200,
+        height: 300,
+        resizeMode: 'contain',
+        marginBottom: '50%',
+    },
+    logo2: {
+        position: 'absolute',
+        width: 200,
         height: 300,
         resizeMode: 'contain',
     },
@@ -234,7 +227,7 @@ const styles = StyleSheet.create({
     gridContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         width: '100%',
     },
     tile: {

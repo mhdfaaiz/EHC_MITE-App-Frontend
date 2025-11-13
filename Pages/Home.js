@@ -4,27 +4,21 @@ import SignalDisplay from '../Components/signalDisplay';
 export default function App({ navigation }) {
     return (
         <ImageBackground
-            source={require("../assets/BG.png")}
+            source={require("../assets/ehchassantukbg.jpg")}
             style={styles.background}
             resizeMode="cover"
         >
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.container}>
                     {/* Logo Section */}
-                    <View style={[styles.logoContainer, styles.elevation]}>
                         <Image 
-                            style={styles.logo} 
-                            source={require('../assets/logos.png')} 
-                            resizeMode="contain"
+                            style={styles.logo1} 
+                            source={require('../assets/EHC-Black-trans.png')} 
                         /> 
-                    </View>
-                    <View style={[styles.borealpicContainer, styles.elevation]}>
                         <Image 
-                            style={styles.borealpic} 
-                            source={require('../assets/borealpic.jpg')} 
-                            resizeMode="contain"
-                        /> 
-                    </View>                    
+                            style={styles.logo2} 
+                            source={require('../assets/mite.png')} 
+                        />              
                 </View>
                 {/* Navigation Button for New Page */}
                 <TouchableOpacity
@@ -33,7 +27,7 @@ export default function App({ navigation }) {
                 >
                     <Text style={styles.buttonText}>Go to Main Page</Text>
                 </TouchableOpacity>
-                <Text style={styles.version}>V 0.1</Text>
+                <Text style={styles.version}>V 1.2</Text>
                 <Text style={styles.subText}>Powered by SONIC</Text>
             </SafeAreaView>
         </ImageBackground>
@@ -59,8 +53,6 @@ const styles = StyleSheet.create({
     logoContainer: {
         width: '100%',
         height: '15%',
-        alignItems: 'center',
-        justifyContent: 'center',
         backgroundColor: 'rgba(255, 255, 255, 0.58)',
         borderRadius: 5,
         marginTop: 25,
@@ -73,8 +65,15 @@ const styles = StyleSheet.create({
         elevation: 50,
         shadowColor: '#000',
     },
-    logo: {
-        width: 250,
+    logo1: {
+        width: 200,
+        height: 300,
+        resizeMode: 'contain',
+        marginBottom: '50%',
+    },
+    logo2: {
+        position: 'absolute',
+        width: 200,
         height: 300,
         resizeMode: 'contain',
     },
@@ -124,7 +123,7 @@ const styles = StyleSheet.create({
         marginBottom: 30
     },
     button: {
-        backgroundColor: 'rgba(48, 92, 237, 0.5)',
+        backgroundColor: 'rgba(190, 196, 216, 0.5)',
         paddingVertical: 15,
         paddingHorizontal: 40,
         borderRadius: 15,

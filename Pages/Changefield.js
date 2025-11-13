@@ -33,7 +33,7 @@ export default function ChangePage() {
     const handleSubmit = async () => {
         try {
             const updateNamesPromises = serialNames.map(({ id, name }) =>
-                fetch(`https://transgaz.soniciot.com/api/Serial_List/${id}`, {
+                fetch(`https://soniciot.com/api/Serial_List/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name }),
@@ -50,14 +50,14 @@ export default function ChangePage() {
 
     return (
          <ImageBackground
-            source={require("../assets/BG.png")} // Change this to your image path
+            source={require("../assets/ehchassantukbg.jpg")} // Change this to your image path
             style={styles.background}
             resizeMode="cover"
             >
             <View style={styles.container}>
                 <Image
                     style={styles.logo}
-                    source={require('../assets/logos.png')} // Change this to your image path
+                    source={require('../assets/EHC-Black-trans.png')} // Change this to your image path
                     resizeMode="contain"
                 />
 

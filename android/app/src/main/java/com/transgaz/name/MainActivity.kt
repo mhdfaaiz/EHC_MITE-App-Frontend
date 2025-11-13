@@ -1,4 +1,4 @@
-package com.transgaz
+package com.ehchassantuk
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

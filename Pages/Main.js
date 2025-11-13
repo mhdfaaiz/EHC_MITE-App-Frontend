@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Animated, StyleSheet, TouchableOpacity, Text, SafeAreaView, Image, FlatList, TextInput, ActivityIndicator } from 'react-native';
 const { io } = require("socket.io-client");
 import Icon from 'react-native-vector-icons/Ionicons';
+import { createElement } from 'react-native';
 import SignalDisplay from '../Components/signalDisplay';
 
 
 const IndicatorApp = ({ route, navigation }) => {
     const [tableData, setTableData] = useState([]);
-    const [alarmData, setAlarmData] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [logData, setLogData] = useState([]); // For logs from /api/datas
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [indicatorColors, setIndicatorColors] = useState({});
     const [connectionState, setConnectionState] = useState({ color: '#ff2323', serialNo: null });
@@ -18,13 +19,8 @@ const IndicatorApp = ({ route, navigation }) => {
     const iconNames = ['DI1', 'DI2', 'DI3', 'DI4']
     const flatListRef = useRef(null);
     const serialNumber = route.params?.serialNumber;
+    const [active, setActive] = useState(false);
     const [activeButton, setActiveButton] = useState('live')
-    const [isCleared, setIsCleared] = useState(false);
-    const [thresholds, setThresholds] = useState({
-        DI1: 100, 
-        DI3: 1, 
-        DI4: 5000, 
-    });
 
     const handlePressIn = (buttonName) => {
         setActiveButton(buttonName);
@@ -36,208 +32,91 @@ const IndicatorApp = ({ route, navigation }) => {
         setCurrentView(buttonName);
         setActiveButton(buttonName); // Set the button as active when clicked
     };
-
-    const clearTableData = () => {
-        if (currentView === 'live') {
-            setTableData([]);
-            setIsCleared(true); // Mark as cleared for live data
-        } else if (currentView === 'alarms') {
-            setAlarmData([]);
-        }
-    };
-
-    // Add refs for thresholds and indicatorColors
-    const thresholdsRef = useRef(thresholds);
-    const indicatorColorsRef = useRef(indicatorColors);
-
-    // Update refs whenever these values change
+    // Socket Initialization
     useEffect(() => {
-        thresholdsRef.current = thresholds;
-    }, [thresholds]);
+        const socket = io("https://soniciot.com");
 
-    useEffect(() => {
-        indicatorColorsRef.current = indicatorColors;
-    }, [indicatorColors]);
-
-    //check device online using ping mechanism
-
-    useEffect(() => {
-        let pingInterval = null;
-    
-        const checkDeviceStatus = async () => {
-            try {
-                const response = await fetch(`https://transgaz.soniciot.com/api/ping/${serialNumber}`);
-                if (response.ok) {
-                    // If the ping is successful, mark the device as online
-                    setConnectionState({ color: '#16b800', serialNo: serialNumber });
-                } else {
-                    // If the ping fails, mark the device as offline
-                    setConnectionState({ color: '#ff2323', serialNo: serialNumber });
-                }
-            } catch (error) {
-                // Handle network or other errors
-                setConnectionState({ color: '#ff2323', serialNo: serialNumber });
-            }
-        };
-    
-        // Start the periodic ping
-        pingInterval = setInterval(checkDeviceStatus, 15000); // Ping every 10 seconds
-    
-        // Perform an initial ping immediately
-        checkDeviceStatus();
-    
-        return () => {
-            // Clear the interval on component unmount
-            clearInterval(pingInterval);
-        };
-    }, [serialNumber]);
-
-    useEffect(() => {
-        const socket = io("https://transgaz.soniciot.com", {
-            reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 2000,
-            timeout: 20000,
-        });
-    
-        let lastMessageTimestamp = null;
-        let connectionCheckInterval = null;
-
-    
         socket.on('connect', () => {
             console.log('WebSocket connected');
         });
-    
+
         socket.on("connect_error", (err) => {
             console.error("Connection error:", err);
         });
-    
+
         socket.on('disconnect', () => {
             console.log('WebSocket disconnected');
         });
-    
-        socket.on("reconnect_attempt", () => {
-            console.log('Attempting to reconnect...');
-        });
-    
-        socket.on("reconnect", () => {
-            console.log('Reconnected successfully');
-        });
-    
-        socket.on("reconnect_failed", () => {
-            console.error('Reconnection failed');
-        });
-    
-        socket.on("bivicomdata", (data) => {
-            try {
-                data = JSON.parse(data);
-    
-                if (data.serialNumber === serialNumber) {
-                    lastMessageTimestamp = Date.now();
-    
-                    const valueA = data.A;
-                    const valueB = data.B;
-                    const valueC = data.C;
-                    const valueD = data.D;
-    
-                    console.log(valueA, valueB, valueC, valueD);
-    
-                    const timestamp = new Date().toLocaleString();
-    
-                    const newData = [
-                        { TIMESTAMP: timestamp, INPUT: 'DI1', MESSAGE: valueA },
-                        { TIMESTAMP: timestamp, INPUT: 'DI2', MESSAGE: valueB },
-                        { TIMESTAMP: timestamp, INPUT: 'DI3', MESSAGE: valueC },
-                        { TIMESTAMP: timestamp, INPUT: 'DI4', MESSAGE: valueD },
-                    ];
-    
-                    setTableData((prevTableData) => [...prevTableData, ...newData]);
-    
-                    const updatedColors = { ...indicatorColors };
-                    const newAlarmData = [];
-    
-                    if (valueA > thresholdsRef.current.DI1) {
-                        updatedColors['DI1'] = '#b10303';
-                        newAlarmData.push({ TIMESTAMP: timestamp, INPUT: 'DI1', MESSAGE: valueA });
-                    } else {
-                        updatedColors['DI1'] = '#16b800';
-                    }
-    
-                    if (valueB > thresholdsRef.current.DI2) {
-                        updatedColors['DI2'] = '#b10303';
-                        newAlarmData.push({ TIMESTAMP: timestamp, INPUT: 'DI2', MESSAGE: valueB });
-                    } else {
-                        updatedColors['DI2'] = '#16b800';
-                    }
-    
-                    if (valueC > thresholdsRef.current.DI3) {
-                        updatedColors['DI3'] = '#b10303';
-                        newAlarmData.push({ TIMESTAMP: timestamp, INPUT: 'DI3', MESSAGE: valueC });
-                    } else {
-                        updatedColors['DI3'] = '#16b800';
-                    }
-    
-                    if (valueD > thresholdsRef.current.DI4) {
-                        updatedColors['DI4'] = '#b10303';
-                        newAlarmData.push({ TIMESTAMP: timestamp, INPUT: 'DI4', MESSAGE: valueD });
-                    } else {
-                        updatedColors['DI4'] = '#16b800';
-                    }
-    
-                    setAlarmData((prevAlarmData) => [...prevAlarmData, ...newAlarmData]);
-                    setIndicatorColors(updatedColors);
 
-                    // Save updated colors to the backend
-                    ['DI1', 'DI2', 'DI3', 'DI4'].forEach((indicator) => {
-                        const newColor = updatedColors[indicator];
-                        fetch('https://transgaz.soniciot.com/api/indicatoricons/update', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                serial_number: serialNumber,
-                                indicator,
-                                color: newColor,
-                            }),
-                        }).catch((error) => console.error(`Error saving color for ${indicator}:`, error));
-                    });
+        socket.on('status', (data) => {
+            console.log("Received updated client status:", data);
+            if (serialNumber in data) {
+                status = data[serialNumber]
+                const color = status === "down" ? '#ff2323' : '#16b800';
+                setConnectionState({ color, serialNo: serialNumber });
+            }
+        });
+
+        socket.on('alarm', (data) => {
+            if (typeof data === 'string') {
+                try {
+                    data = JSON.parse(data);
+                    console.log(data);
+
+                } catch (e) {
+                    console.error('Error parsing data:', e);
+                    return;
                 }
-            } catch (err) {
-                console.error("Socket data parsing error:", err);
+            }
+            if (data.serialno === serialNumber) {
+                const formattedData = {
+                    id: `${data.timestamp || Date.now()}-${data.data || Math.random()}`,
+                    TIMESTAMP: data.timestamp || 'N/A',
+                    INPUT: data.data || 'N/A',
+                    VALUE: data.status || 'N/A',
+                };
+
+                setTableData((prevData) => [...prevData, formattedData]);
+                setTimeout(() => {
+                    flatListRef.current?.scrollToEnd({ animated: true });
+                }, 0);
+                const newColor = data.status === '0' ? '#16b800' : '#b10303';
+                setIndicatorColors((prevColors) => ({
+                    ...prevColors,
+                    [data.data]: newColor,
+                }));
+                // Save the updated color to the backend
+                fetch('https://soniciot.com/api/indicatoricons/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        serial_number: serialNumber,
+                        indicator: data.data,
+                        color: newColor,
+                    }),
+                }).catch(error => console.error('Error saving indicator color:', error));
             }
         });
-    
-        const interval = setInterval(() => {
-            socket.emit("ping");
-        }, 15000);
-    
-    
-        return () => {
-            clearInterval(interval);
-            socket.disconnect();
-        };
-    }, [serialNumber, thresholds, indicatorColors]);
-    
+        socket.on('voltage', (data) => {
+            console.log("Received updated client status:", data);
+            setActive(true);
 
-    // Fetch thresholds on mount
-    useEffect(() => {
-        const fetchThresholds = async () => {
-            try {
-                const response = await fetch(`https://transgaz.soniciot.com/api/thresholds/${serialNumber}`);
-                const data = await response.json();
-                setThresholds(data);
-            } catch (error) {
-                console.error('Error fetching thresholds:', error);
-            }
+        });
+
+
+        return () => {
+            socket.disconnect();
+            console.log('WebSocket connection closed');
         };
-        fetchThresholds();
-    }, [serialNumber]);
+    }, []);
+
 
 
     //initialize new indicators name if there is no name
     useEffect(() => {
         const initializeIndicators = async () => {
             try {
-                await fetch('https://transgaz.soniciot.com/api/initialize', {
+                await fetch('https://soniciot.com/api/initialize', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -259,7 +138,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const fetchIndicators = async () => {
             try {
-                const response = await fetch(`https://transgaz.soniciot.com/api/indicators/${serialNumber}`);
+                const response = await fetch(`https://soniciot.com/api/indicators/${serialNumber}`);
                 const data = await response.json();
                 console.log(data)
                 setIndicatorname(data); // Set the fetched indicator names to state
@@ -276,7 +155,7 @@ const IndicatorApp = ({ route, navigation }) => {
     useEffect(() => {
         const fetchIndicatorColors = async () => {
             try {
-                const response = await fetch(`https://transgaz.soniciot.com/api/indicatoricons/${serialNumber}`);
+                const response = await fetch(`https://soniciot.com/api/indicatoricons/${serialNumber}`);
                 const data = await response.json();
 
                 // Map the colors from the response
@@ -297,10 +176,70 @@ const IndicatorApp = ({ route, navigation }) => {
     }, [serialNumber]);
 
 
+
+    const fetchLogs = async () => {
+        try {
+            const response = await fetch("https://soniciot.com/api/logs"); // Replace with your API URL
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch logs");
+            }
+
+            const data = await response.json(); // Parse JSON response
+
+            // Filter logs by the serial number
+            const filteredData = data.filter((log) => log.device === serialNumber);
+
+            // Sort logs in ascending order of the date
+            const sortedData = filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Add sequential ID numbers to the sorted logs
+            const numberedData = sortedData.map((log, index) => ({
+                ...log,
+                id: index + 1, // Add a new 'id' field starting from 1
+            }));
+
+            setLogData(numberedData); // Store the fetched logs with IDs
+            setLoading(false);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+
+
+    useEffect(() => {
+        fetchLogs(); // Fetch logs when the component mounts
+
+        // Poll the API every 5 seconds for real-time updates
+        const interval = setInterval(() => {
+            fetchLogs();
+        }, 5000);
+
+        // Cleanup interval on component unmount
+        return () => clearInterval(interval);
+    }, []);
+
+    // Fetch Data on Mount
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('https://soniciot.com/api/mqtt-data');
+                await response.json();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                setError('Error fetching data. Please try again later.');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
     useEffect(() => {
         const fetchReverseIndicator = async () => {
             try {
-                const response = await fetch(`https://transgaz.soniciot.com/api/reverse-indicator/${serialNumber}`);
+                const response = await fetch(`https://soniciot.com/api/reverse-indicator/${serialNumber}`);
                 const data = await response.json();
                 setIsReversed(data.isReversed);
             } catch (error) {
@@ -313,19 +252,14 @@ const IndicatorApp = ({ route, navigation }) => {
 
     const getIndicatorColor = useCallback(
         (index) => {
-            // If the device is offline, return gray for all indicators
-            if (connectionState.color !== '#16b800') {
-                return 'grey';
-            }
-    
-            // Otherwise, get the color from the indicatorColors state
             const color = indicatorColors[index] || 'grey';
             if (isReversed) {
                 return color === '#16b800' ? '#b10303' : color === '#b10303' ? '#16b800' : color;
             }
             return color;
         },
-        [indicatorColors, isReversed, connectionState.color]
+        [indicatorColors, isReversed]
+
     );
 
     const renderRow = useCallback(({ item }) => {
@@ -334,15 +268,46 @@ const IndicatorApp = ({ route, navigation }) => {
         const indicatorDisplayName = indicatorname[indicatorIndex]?.name || item.INPUT; // Use the indicator name or fallback to INPUT
 
         // Determine the alarm status
-        //const alarmStatus = item.VALUE === '1' ? 'Alarm ON' : 'Alarm OFF';
+        const alarmStatus = item.VALUE === '1' ? 'Alarm ON' : 'Alarm OFF';
         return (
             <View style={styles.row}>
                 <Text style={[styles.cell, styles.dateCell]}>{item.TIMESTAMP}</Text>
                 <Text style={[styles.cell, styles.dataCell]}>{indicatorDisplayName}</Text>
-                <Text style={[styles.cell, styles.statusCell]}>{item.MESSAGE}</Text>
+                <Text style={[styles.cell, styles.statusCell]}>{alarmStatus}</Text>
             </View>
         );
     }, [indicatorname]);
+
+
+    const renderItem = ({ item }) => {
+        // Function to get the indicator name based on the parameter value
+        const getIndicatorName = (parameter) => {
+            switch (parameter) {
+                case 'DI1':
+                    return indicatorname[0].name; // Access the 'name' property
+                case 'DI2':
+                    return indicatorname[1].name; // Access the 'name' property
+                case 'DI3':
+                    return indicatorname[2].name; // Access the 'name' property
+                case 'DI4':
+                    return indicatorname[3].name; // Access the 'name' property
+                default:
+                    return parameter; // Return the original parameter if no match is found
+            }
+        };
+
+    
+        return (
+            <View style={styles.row}>
+                <Text style={[styles.celll, styles.col1]}>{item.id}</Text>
+                <Text style={[styles.celll, styles.col2]}>{new Date(item.registered_at).toLocaleString()}</Text>
+                <Text style={[styles.celll, styles.col3]}>
+                    {item.event === 'ALARM HIGH' ? 'ALARM ON' : item.event === 'ALARM LOW' ? 'ALARM OFF' : item.event}
+                </Text>
+                <Text style={[styles.celll, styles.col4]}>{getIndicatorName(item.parameter)}</Text>
+            </View>
+        );
+    };
 
 
     if (loading) {
@@ -373,30 +338,23 @@ const IndicatorApp = ({ route, navigation }) => {
             serialNumber,
             indicatorNames: indicatorname,
             reverseState: isReversed,
-            onUpdate: ({ updatedIndicatornames, updatedReversestate, updatedThresholds }) => {
+            onUpdate: ({ updatedIndicatornames, updatedReversestate }) => {
                 if (updatedIndicatornames) {
-                    setIndicatorname(updatedIndicatornames); // Update indicator names dynamically
+                    setIndicatorname(updatedIndicatornames); // Updates the state in Main Page
                 }
                 if (updatedReversestate !== undefined) {
-                    setIsReversed(updatedReversestate); // Update reverse state dynamically
-                }
-                if (updatedThresholds) {
-                    setThresholds(updatedThresholds); // Update thresholds dynamically
+                    setIsReversed(updatedReversestate); // Updates the state in Main Page
                 }
             },
         });
     };
-
-
-
-
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.first}>
                 
                     <Image 
                     style={styles.logo} 
-                    source={require('../assets/logos.png')} // Change this to your image path
+                    source={require('../assets/EHC-Black-trans.png')} // Change this to your image path
                     resizeMode="contain"
                     />
                     <Icon style={styles.settings} name="settings-outline" size={30} color="gray" onPress={handleNextPage} />
@@ -411,13 +369,11 @@ const IndicatorApp = ({ route, navigation }) => {
                     <Text style={[styles.statusText, { color: connectionState.color }]}>
                         {connectionState.color === '#16b800' ? 'ONLINE' : 'OFFLINE'}
                     </Text>
-                    {/* Render SignalDisplay only if the device is online */}
-                    {connectionState.color === '#16b800' && <SignalDisplay serialNo={serialNumber} />}
+                    <SignalDisplay serialNo={serialNumber} />
                 </View>
             </View>
 
             <View style={styles.indicatorContainer}>
-                {/* Row for the icons */}
                 <View style={styles.indicatorRow}>
                     {iconNames.map((name, index) => (
                         <View key={index} style={styles.indicatorWrapper}>
@@ -448,30 +404,12 @@ const IndicatorApp = ({ route, navigation }) => {
                         </View>
                     ))}
                 </View>
-
-                {/* Row for the indicator names */}
                 <View style={styles.indicatornameRow}>
                     {indicatorname.map((indicator) => (
                         <View key={indicator.id} style={styles.indicatorWrapper}>
                             <Text style={styles.label}>{indicator.name}</Text>
                         </View>
                     ))}
-                </View>
-
-                {/* Row for the labels (PPM, LEL%, mA) aligned with the icons */}
-                <View style={styles.indicatorLabelRow}>
-                    <View style={styles.indicatorWrapper}>
-                        <Text style={styles.label}>PPM</Text>
-                    </View>
-                    <View style={styles.indicatorWrapper}>
-                        <Text style={styles.label}>PPM</Text>
-                    </View>
-                    <View style={styles.indicatorWrapper}>
-                        <Text style={styles.label}>LEL%</Text>
-                    </View>
-                    <View style={styles.indicatorWrapper}>
-                        <Text style={styles.label}>mA</Text>
-                    </View>
                 </View>
             </View>
             <View style={styles.switchbuttons}>
@@ -484,19 +422,22 @@ const IndicatorApp = ({ route, navigation }) => {
                     </TouchableOpacity>
                 </Animated.View>
 
-                <Animated.View style={{ transform: [{ scale: getScaleValue('alarms') }] }}>
+                <Animated.View style={{ transform: [{ scale: getScaleValue('logs') }] }}>
                     <TouchableOpacity
-                        onPressIn={() => handlePressIn('alarms')}
-                        onPress={() => handleButtonPress('alarms')}
+                        onPressIn={() => handlePressIn('logs')}
+                        onPress={() => handleButtonPress('logs')}
                     >
-                        <Text style={styles.logs}>Alarms</Text>
+                        <Text style={styles.logs}>Logs</Text>
                     </TouchableOpacity>
                 </Animated.View>
+
+                {currentView === 'live' && (
                     <TouchableOpacity style={styles.clearbutton}
-                        onPress={clearTableData}
+                        onPress={() => setTableData([])}
                     >
                         <Text style={styles.cleartext}>Clear</Text>
                     </TouchableOpacity>
+                )}
             </View>
 
             <View style={boxStyle}>
@@ -504,17 +445,17 @@ const IndicatorApp = ({ route, navigation }) => {
                 {currentView === 'live' && (
                     <>
                         <View style={styles.header}>
-                            <Text style={[styles.heading, styles.dateHead]}>DATE & TIME</Text>
-                            <Text style={[styles.heading, styles.dataCell]}>ALARM</Text>
+                            <Text style={[styles.heading, styles.dateHead]}>DATE / TIME</Text>
+                            <Text style={[styles.heading, styles.dataCell]}>INPUT</Text>
                             <Text style={[styles.heading, styles.statusHead]}>STATUS</Text>
                         </View>
 
                         <FlatList
                             ref={flatListRef}
                             style={styles.tablebox}
-                            data={currentView === 'live' ? tableData : alarmData}
+                            data={tableData}
                             renderItem={renderRow}
-                            keyExtractor={(item, index) => `${index}-${item.TIMESTAMP}`}
+                            keyExtractor={(item, index) => `${index}-${item.TIMESTAMP}`} // Use unique ID for key
                             contentContainerStyle={styles.body}
                             ListEmptyComponent={() => (
                                 <Text style={{ textAlign: 'center', color: 'gray', marginTop: 20 }}>
@@ -523,25 +464,26 @@ const IndicatorApp = ({ route, navigation }) => {
                             )}
                             initialNumToRender={10}
                             windowSize={5}
-                            removeClippedSubviews={false} // Disable to check if this resolves the issue
+                            removeClippedSubviews={true}
                         />
                     </>
                 )}
 
-                {currentView === 'alarms' && (
+                {currentView === 'logs' && (
                     <>
                         <View style={styles.header}>
-                            <Text style={[styles.heading, styles.dateHead]}>DATE & TIME</Text>
-                            <Text style={[styles.heading, styles.dataCell]}>ALARM</Text>
-                            <Text style={[styles.heading, styles.statusHead]}>STATUS</Text>
+                            <Text style={[styles.heading, styles.si]}>NO</Text>
+                            <Text style={[styles.heading, styles.dt]}>DATE&TIME</Text>
+                            <Text style={[styles.heading, styles.al]}>ALARM</Text>
+                            <Text style={[styles.heading, styles.st]}>STATUS</Text>
                         </View>
 
                         <FlatList
                             ref={flatListRef}
                             style={styles.tablebox}
-                            data={currentView === 'live' ? tableData : alarmData}
-                            renderItem={renderRow}
-                            keyExtractor={(item, index) => `${index}-${item.TIMESTAMP}`}
+                            data={logData}
+                            renderItem={renderItem}
+                            keyExtractor={(item, index) => `${index}-${item.TIMESTAMP}`} // Use unique ID for key
                             contentContainerStyle={styles.body}
                             ListEmptyComponent={() => (
                                 <Text style={{ textAlign: 'center', color: 'gray', marginTop: 20 }}>
@@ -550,7 +492,7 @@ const IndicatorApp = ({ route, navigation }) => {
                             )}
                             initialNumToRender={10}
                             windowSize={5}
-                            removeClippedSubviews={false} // Disable to check if this resolves the issue
+                            removeClippedSubviews={true}
                         />
                     </>
                 )}
@@ -568,8 +510,8 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     logo: {
-        width: 200,
-        height: 70,
+        width: 90,
+        height: 50,
         resizeMode: 'contain',
         opacity : 0.8,
         marginBottom: 20
@@ -581,7 +523,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: 'rgba(255, 255, 255, 0.4)',
         textAlign: 'center',
-        marginTop: '20%'  
+        marginBottom: 30
     },
     SignalDisplay:{
         
@@ -713,11 +655,7 @@ const styles = StyleSheet.create({
     },
     indicatornameRow: {
         flexDirection: 'row',
-        marginBottom: 5,
-    },
-    indicatorLabelRow: {
-        flexDirection: 'row',
-        marginBottom: 20,
+        marginBottom: 20
     },
     indicatorWrapper: {
         marginHorizontal: '3%',

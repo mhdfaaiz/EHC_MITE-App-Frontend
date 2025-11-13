@@ -1,4 +1,4 @@
-package com.transgaz
+package com.ehchassantuk
 
 import android.app.Application
 import com.facebook.react.PackageList

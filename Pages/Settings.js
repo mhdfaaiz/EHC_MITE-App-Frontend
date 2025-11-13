@@ -1,35 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Switch, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Switch, ScrollView ,Image} from 'react-native';
 
 export default function SettingsPage({ route, navigation }) {
     const { serialNumber, indicatorNames, reverseState, onUpdate } = route.params;
     const [indicatorname, setIndicatorname] = useState(indicatorNames);
     const [isReversed, setIsReversed] = useState(reverseState);
-    const [thresholds, setThresholds] = useState({}); // State for thresholds
-    const [isEditingNames, setIsEditingNames] = useState(false);
-    const [isEditingThresholds, setIsEditingThresholds] = useState(false); // Separate edit mode for thresholds
-
-    useEffect(() => {
-        // Fetch thresholds from the backend when the settings page loads
-        const fetchThresholds = async () => {
-            try {
-                const response = await fetch(`https://transgaz.soniciot.com/api/thresholds/${serialNumber}`);
-                const data = await response.json();
-                setThresholds(data); // Initialize thresholds from the backend
-            } catch (error) {
-                console.error('Error fetching thresholds:', error);
-            }
-        };
-
-        fetchThresholds();
-    }, [serialNumber]);
-
-    const handleThresholdChange = (key, value) => {
-        setThresholds((prev) => ({
-            ...prev,
-            [key]: value === "" ? "" : parseFloat(value), // Keep empty string when cleared
-        }));
-    };
+    const [isEditing, setIsEditing] = useState(false);
 
     const handleNameChange = (id, newName) => {
         setIndicatorname((prevNames) =>
@@ -40,7 +16,7 @@ export default function SettingsPage({ route, navigation }) {
     const handleSubmit = async () => {
         try {
             const updateNamesPromises = indicatorname.map(({ id, name }) =>
-                fetch(`https://transgaz.soniciot.com/api/indicators/${id}`, {
+                fetch(`https://soniciot.com/api/indicators/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name }),
@@ -49,28 +25,20 @@ export default function SettingsPage({ route, navigation }) {
             await Promise.all(updateNamesPromises);
 
             const reverseResponse = await fetch(
-                `https://transgaz.soniciot.com/api/reverse-indicator/${serialNumber}`,
+                `https://soniciot.com/api/reverse-indicator/${serialNumber}`,
                 {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ isReversed }),
                 }
             );
-            await reverseResponse.json();
-
-            // Save thresholds to the backend using DI1, DI2, etc.
-            await fetch(`https://transgaz.soniciot.com/api/thresholds/${serialNumber}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(thresholds),
-            });
+            const reverseData = await reverseResponse.json();
+            if (reverseData.success) {
+                console.log('Reverse indicator updated successfully');
+            }
 
             if (onUpdate) {
-                onUpdate({
-                    updatedIndicatornames: indicatorname,
-                    updatedReversestate: isReversed,
-                    updatedThresholds: thresholds, // Pass thresholds back to IndicatorApp
-                });
+                onUpdate({ updatedIndicatornames: indicatorname, updatedReversestate: isReversed });
             }
             navigation.goBack();
         } catch (error) {
@@ -81,20 +49,22 @@ export default function SettingsPage({ route, navigation }) {
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.container}>
-                <Image
-                    style={styles.logo}
-                    source={require('../assets/logos.png')}
+                <Image 
+                    style={styles.logo} 
+                    source={require('../assets/EHC-Black-trans.png')} // Change this to your image path
                     resizeMode="contain"
                 />
                 <Text style={styles.pageTitle}>Settings</Text>
 
-                {/* Indicator Names Section */}
                 <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Indicator Names</Text>
+                    {/* Section Title */}
+                    <Text style={styles.sectionTitle}>Change Indicator Names</Text>
+
+                    {/* Indicator Name List */}
                     <View style={styles.indicatorList}>
-                        {indicatorname.map(({ id, name }, index) => (
+                        {indicatorname.map(({ id, name }) => (
                             <View key={id} style={styles.indicatorWrapper}>
-                                {isEditingNames ? (
+                                {isEditing ? (
                                     <TextInput
                                         style={styles.textInput}
                                         value={name}
@@ -106,63 +76,20 @@ export default function SettingsPage({ route, navigation }) {
                             </View>
                         ))}
                     </View>
-                    <View style={styles.buttonRow}>
-                        {!isEditingNames ? (
-                            <TouchableOpacity
-                                style={styles.actionButton}
-                                onPress={() => setIsEditingNames(true)}
-                            >
-                                <Text style={styles.buttonText}>Edit</Text>
-                            </TouchableOpacity>
-                        ) : (
-                            <TouchableOpacity
-                                style={styles.actionButton}
-                                onPress={() => setIsEditingNames(false)}
-                            >
-                                <Text style={styles.buttonText}>Save</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                </View>
 
-                {/* Thresholds Section */}
-                <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Indicator Thresholds</Text>
-                    <View style={styles.indicatorList}>
-                        {indicatorname.map(({ id, name }, index) => {
-                            const diKey = `DI${index + 1}`; // Use DI1, DI2, etc.
-                            return (
-                                <View key={id} style={styles.indicatorWrapper}>
-                                    <Text style={styles.indicatorName}>{name}</Text>
-                                    {isEditingThresholds ? (
-                                        <TextInput
-                                            style={styles.textInput}
-                                            keyboardType="numeric"
-                                            placeholder="Threshold"
-                                            value={thresholds[diKey]?.toString() || ""}
-                                            onChangeText={(value) => handleThresholdChange(diKey, value)}
-                                        />
-                                    ) : (
-                                        <Text style={styles.thresholdValue}>
-                                            Threshold: {thresholds[diKey] || 'Not Set'}
-                                        </Text>
-                                    )}
-                                </View>
-                            );
-                        })}
-                    </View>
+                    {/* Edit/Save Button */}
                     <View style={styles.buttonRow}>
-                        {!isEditingThresholds ? (
+                        {!isEditing ? (
                             <TouchableOpacity
                                 style={styles.actionButton}
-                                onPress={() => setIsEditingThresholds(true)}
+                                onPress={() => setIsEditing(true)}
                             >
                                 <Text style={styles.buttonText}>Edit</Text>
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity
                                 style={styles.actionButton}
-                                onPress={() => setIsEditingThresholds(false)}
+                                onPress={() => setIsEditing(false)}
                             >
                                 <Text style={styles.buttonText}>Save</Text>
                             </TouchableOpacity>
@@ -198,19 +125,19 @@ const styles = StyleSheet.create({
     },
     logo: {
         position: 'absolute',
-        width: 130,
-        height: 70,
+        width: 90,
+        height: 50,
         resizeMode: 'contain',
-        opacity: 0.8,
-        left: 10,
-        top: 10,
+        opacity : 0.8,
+        left : 10,
+        top : 10
     },
     subTextdown: {
         fontSize: 12,
         color: 'rgba(255, 255, 255, 0.4)',
         textAlign: 'center',
         marginBottom: 10,
-        marginTop: 10,
+        marginTop: 10
     },
     pageTitle: {
         fontSize: 36,
@@ -245,7 +172,6 @@ const styles = StyleSheet.create({
     indicatorWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
         marginBottom: 15,
         borderBottomWidth: 1,
         borderBottomColor: '#444',
@@ -257,7 +183,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     textInput: {
-        width: '40%',
+        width: '80%',
         backgroundColor: '#333',
         padding: 10,
         color: '#fff',
@@ -265,17 +191,13 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#888',
     },
-    thresholdValue: {
-        fontSize: 16,
-        color: '#bbb',
-    },
     buttonRow: {
         flexDirection: 'row',
         justifyContent: 'center',
         marginTop: 10,
     },
     actionButton: {
-        backgroundColor: '#3d3b3b', // Button background
+        backgroundColor: '#3d3b3b', // Blue color
         paddingVertical: 12,
         paddingHorizontal: 40,
         borderRadius: 30,
@@ -287,7 +209,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
     },
     submitButton: {
-        backgroundColor: '#3d3b3b', // Submit button background
+        backgroundColor: '#3d3b3b', // Vibrant Orange color for action
         paddingVertical: 15,
         paddingHorizontal: 50,
         borderRadius: 30,
@@ -313,3 +235,4 @@ const styles = StyleSheet.create({
         color: '#bbb',
     },
 });
+
